@@ -415,7 +415,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 1548]
+    coordinate: [310, 1597]
     rotation: 0
     state: enabled
 - name: blocks_multiply_const_vxx_0
@@ -997,37 +997,40 @@ blocks:
   id: epy_block
   parameters:
     _source_code: "from gnuradio import gr\nimport re\nimport numpy as np\nimport\
-      \ time\nimport re\n\ndef sensing_algorithm(sensing_input):\n    #print(sensing_input)\n\
-      \    return 1\n\nclass mac(gr.sync_block):\n    def __init__(self):\n      \
-      \  gr.sync_block.__init__(self,\n            name=\"MAC\",\n            in_sig=[np.float32],\n\
-      \            out_sig=None\n            )\n        # Message portsw\n       \
-      \ self.message_port_register_out(gr.pmt.intern(\"transmit_packet\"))\n     \
-      \   self.message_port_register_in(gr.pmt.intern(\"transmit_init\"))\n      \
-      \  self.message_port_register_in(gr.pmt.intern(\"ack\"))\n        self.set_msg_handler(gr.pmt.intern('transmit_init'),\
-      \ self.send_pckt)\n        self.set_msg_handler(gr.pmt.intern('ack'), self.ack_handler)\n\
-      \        self.i = 0\n        self.n = 1\n        self.sensing_input = 0\n  \
-      \      \n    def ack_handler(self, msg):\n        \n        \n        msg_vec\
+      \ time\nimport re\n\n\nclass mac(gr.sync_block):\n    def __init__(self):\n\
+      \        gr.sync_block.__init__(self,\n            name=\"MAC\",\n         \
+      \   in_sig=[np.float32],\n            out_sig=None\n            )\n        #\
+      \ Message portsw\n        self.message_port_register_out(gr.pmt.intern(\"transmit_packet\"\
+      ))\n        self.message_port_register_in(gr.pmt.intern(\"time_unit\"))\n  \
+      \      self.message_port_register_in(gr.pmt.intern(\"ack\"))\n        self.set_msg_handler(gr.pmt.intern('time_unit'),\
+      \ self.send_packet)\n        self.set_msg_handler(gr.pmt.intern('ack'), self.ack_handler)\n\
+      \        self.sensing_input = 0\n        self.interation_wait_ack = 10 # interation_wait_ack\
+      \ * 3ms = 30ms waiting\n        self.packet_num_send = 1\n        self.packet_num_received\
+      \ = 1\n        \n    def ack_handler(self, msg):\n        \n        msg_vec\
       \ = gr.pmt.car(msg)\n        msg_data = gr.pmt.write_string(msg_vec)\n     \
-      \   pattern = \"\\(packet_num \\. (.*?)\\)\\)\"\n        packet_num = int(re.search(pattern,\
-      \ msg_data).group(1))\n        \n        \n        if (packet_num == self.i):\n\
-      \            print(\"ACK of \" + str(packet_num) + \"Received\")\n         \
-      \   self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message\
-      \ received!'))\n            self.i += 1\n\n        else:\n            print(\"\
-      NACK of \" + str(packet_num) + \"Received\")\n            self.message_port_pub(gr.pmt.intern('transmit_packet'),\
-      \ gr.pmt.intern('message received!'))\n            self.i += 1\n        \n \
-      \   def send_pckt(self, msg):\n\n        if self.i < self.n:\n            self.message_port_pub(gr.pmt.intern('transmit_packet'),\
-      \ gr.pmt.intern('message!'))\n            self.i += 1\n\n\n    def work(self,\
+      \   pattern = \"\\(packet_num \\. (.*?)\\)\\)\"\n        self.packet_num_received\
+      \ = int(re.search(pattern, msg_data).group(1))\n        \n        \n    def\
+      \ send_packet(self, msg):\n    \n        if (self.packet_num_received == self.packet_num_send):\n\
+      \            print(\"ACK of \" + str(self.packet_num_received) + \"Received\"\
+      )\n            self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message\
+      \ received!'))\n            self.packet_num_send += 1\n            self.interation_wait_ack\
+      \ = 10\n        \n        elif (self.interation_wait_ack > 0):\n           \
+      \ print(\"NACK of \" + str(self.packet_num_received) + \"Received\")\n     \
+      \       self.interation_wait_ack -= 1\n            \n        elif (self.interation_wait_ack\
+      \ == 0):\n            print(\"DROPPING\" + str(self.packet_num_received))\n\
+      \            self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message\
+      \ received!'))\n            self.packet_num_send += 1\n            self.interation_wait_ack\
+      \ = 10\n            \n        else:\n            return 0\n\n    def work(self,\
       \ input_items, output_items):\n        self.sensing_input = input_items[0]\n\
-      \        sensing_algorithm(self.sensing_input)\n        return (len(input_items[0]))\n\
-      \       \n  \n"
+      \        return (len(input_items[0]))\n       \n  \n"
     affinity: ''
     alias: ''
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('MAC', 'mac', [], [('0', 'float', 1), ('ack', 'message', 1), ('transmit_init',
-      'message', 1)], [('transmit_packet', 'message', 1)], '', [])
+    _io_cache: ('MAC', 'mac', [], [('0', 'float', 1), ('time_unit', 'message', 1),
+      ('ack', 'message', 1)], [('transmit_packet', 'message', 1)], '', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
@@ -2246,7 +2249,7 @@ connections:
 - [blocks_complex_to_mag_1, '0', qtgui_number_sink_0, '0']
 - [blocks_complex_to_mag_1, '0', virtual_sink_1_0_0_0_2, '0']
 - [blocks_delay_0_0_0_0, '0', blocks_multiply_xx_0_0_0_0, '1']
-- [blocks_message_strobe_0, strobe, epy_block_0, transmit_init]
+- [blocks_message_strobe_0, strobe, epy_block_0, time_unit]
 - [blocks_multiply_const_vxx_0, '0', blocks_tag_gate_0, '0']
 - [blocks_multiply_const_vxx_0_0, '0', blocks_complex_to_mag_0, '0']
 - [blocks_multiply_xx_0_0_0_0, '0', digital_header_payload_demux_0_0_0_0, '0']
