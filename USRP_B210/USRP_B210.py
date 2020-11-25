@@ -236,7 +236,7 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         self.fft_vxx_0_1 = fft.fft_vfc(fft_len, True, window.blackmanharris(fft_len), 1)
         self.fft_vxx_0_0_0_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
         self.fft_vxx_0 = fft.fft_vcc(fft_len, False, (), True, 1)
-        self.epy_block_0 = epy_block_0.tuning_uhd()
+        self.epy_block_0 = epy_block_0.mac()
         self.digital_protocol_formatter_async_0 = digital.protocol_formatter_async(hdr_format)
         self.digital_packet_headerparser_b_0_0_0_0 = digital.packet_headerparser_b(header_formatter.base())
         self.digital_ofdm_sync_sc_cfb_0_0_0_0 = digital.ofdm_sync_sc_cfb(fft_len, fft_len//4, False, 0.9)
@@ -291,14 +291,16 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.blocks_random_pdu_0, 'generate'))
+        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.epy_block_0, 'time_unit'))
         self.msg_connect((self.blocks_random_pdu_0, 'pdus'), (self.digital_protocol_formatter_async_0, 'in'))
-        self.msg_connect((self.blocks_tagged_stream_to_pdu_0_0, 'pdus'), (self.epy_block_0, 'gain'))
+        self.msg_connect((self.blocks_tagged_stream_to_pdu_0_0, 'pdus'), (self.epy_block_0, 'ack'))
         self.msg_connect((self.digital_packet_headerparser_b_0_0_0_0, 'header_data'), (self.digital_header_payload_demux_0_0_0_0, 'header_data'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'payload'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'header'), (self.blocks_pdu_to_tagged_stream_0_0, 'pdus'))
+        self.msg_connect((self.epy_block_0, 'transmit_packet'), (self.blocks_random_pdu_0, 'generate'))
         self.connect((self.analog_frequency_modulator_fc_0_0_0_0, 0), (self.blocks_multiply_xx_0_0_0_0, 0))
         self.connect((self.blocks_complex_to_mag_0, 0), (self.blocks_stream_to_vector_0, 0))
+        self.connect((self.blocks_complex_to_mag_1, 0), (self.epy_block_0, 0))
         self.connect((self.blocks_complex_to_mag_1, 0), (self.qtgui_number_sink_0, 0))
         self.connect((self.blocks_delay_0_0_0_0, 0), (self.blocks_multiply_xx_0_0_0_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_tag_gate_0, 0))
