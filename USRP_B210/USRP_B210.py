@@ -89,7 +89,7 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         self.header_mod = header_mod = digital.constellation_bpsk()
         self.fft_len = fft_len = 64
         self.tx_b210_g = tx_b210_g = 45
-        self.tx_b210_f = tx_b210_f = 630000000
+        self.tx_b210_f = tx_b210_f = 700000000
         self.sync_word2 = sync_word2 = [0, 0, 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 0, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 0, 0, 0, 0, 0]
         self.sync_word1 = sync_word1 = [0., 0., 0., 0., 0., 0., 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 0., 0., 0., 0., 0.]
         self.samp_rate = samp_rate = 250000
@@ -291,7 +291,7 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.epy_block_0, 'time_unit'))
+        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.epy_block_0, 'transmit_init'))
         self.msg_connect((self.blocks_random_pdu_0, 'pdus'), (self.digital_protocol_formatter_async_0, 'in'))
         self.msg_connect((self.blocks_tagged_stream_to_pdu_0_0, 'pdus'), (self.epy_block_0, 'ack'))
         self.msg_connect((self.digital_packet_headerparser_b_0_0_0_0, 'header_data'), (self.digital_header_payload_demux_0_0_0_0, 'header_data'))

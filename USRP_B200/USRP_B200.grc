@@ -212,12 +212,12 @@ blocks:
     gui_hint: ''
     label: B200 FREQ RX SU
     type: int
-    value: '610000000'
+    value: '700000000'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1781, 48]
+    coordinate: [1780, 48]
     rotation: 0
     state: enabled
 - name: rx_b200_g
@@ -353,22 +353,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1182, 1142]
+    coordinate: [1184, 1140]
     rotation: 0
     state: enabled
-- name: blocks_message_debug_0_0
-  id: blocks_message_debug
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [602, 1308]
-    rotation: 0
-    state: disabled
 - name: blocks_multiply_const_vxx_0
   id: blocks_multiply_const_vxx
   parameters:
@@ -439,7 +426,7 @@ blocks:
     coordinate: [904, 1470]
     rotation: 0
     state: enabled
-- name: blocks_random_pdu_0
+- name: blocks_random_pdu_0_0
   id: blocks_random_pdu
   parameters:
     affinity: ''
@@ -455,7 +442,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [309, 1463]
+    coordinate: [320, 1344]
     rotation: 0
     state: enabled
 - name: blocks_repack_bits_bb_0
@@ -1967,15 +1954,14 @@ connections:
 - [blocks_multiply_xx_0_0_0, '0', digital_header_payload_demux_0_0_0, '0']
 - [blocks_pdu_to_tagged_stream_0, '0', blocks_repack_bits_bb_0, '0']
 - [blocks_pdu_to_tagged_stream_0_0, '0', blocks_repack_bits_bb_0_0, '0']
-- [blocks_random_pdu_0, pdus, blocks_message_debug_0_0, print_pdu]
-- [blocks_random_pdu_0, pdus, digital_protocol_formatter_async_0, in]
+- [blocks_random_pdu_0_0, pdus, digital_protocol_formatter_async_0, in]
 - [blocks_repack_bits_bb_0, '0', virtual_sink_0_0, '0']
 - [blocks_repack_bits_bb_0_0, '0', header_bits, '0']
 - [blocks_repack_bits_bb_0_1_0_0, '0', blocks_tag_debug_1_0_0, '0']
 - [blocks_tag_gate_0, '0', uhd_usrp_sink_0, '0']
 - [blocks_tagged_stream_mux_0, '0', virtual_sink_0_0_0, '0']
 - [blocks_tagged_stream_to_pdu_0, pdus, blocks_message_debug_0, print_pdu]
-- [blocks_tagged_stream_to_pdu_0, pdus, blocks_random_pdu_0, generate]
+- [blocks_tagged_stream_to_pdu_0, pdus, blocks_random_pdu_0_0, generate]
 - [digital_chunks_to_symbols_xx_0, '0', blocks_tagged_stream_mux_0, '0']
 - [digital_chunks_to_symbols_xx_0_0, '0', blocks_tagged_stream_mux_0, '1']
 - [digital_constellation_decoder_cb_0_0_0, '0', digital_packet_headerparser_b_0_0_0,
