@@ -40,6 +40,7 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import uhd
 import time
 from gnuradio.digital.utils import tagged_streams
+import epy_block_0
 
 from gnuradio import qtgui
 
@@ -96,7 +97,7 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.rx_b200_f = rx_b200_f = 700000000
         self.rolloff = rolloff = 0
         self.payload_equalizer = payload_equalizer = digital.ofdm_equalizer_simpledfe(fft_len, payload_mod.base(), occupied_carriers, pilot_carriers, pilot_symbols, 1)
-        self.packet_len = packet_len = 96
+        self.packet_len = packet_len = 125
         self.header_formatter = header_formatter = digital.packet_header_ofdm(occupied_carriers, n_syms=1, len_tag_key=packet_length_tag_key, frame_len_tag_key=length_tag_key, bits_per_header_sym=header_mod.bits_per_symbol(), bits_per_payload_sym=payload_mod.bits_per_symbol(), scramble_header=False)
         self.header_equalizer = header_equalizer = digital.ofdm_equalizer_simpledfe(fft_len, header_mod.base(), occupied_carriers, pilot_carriers, pilot_symbols)
         self.hdr_format = hdr_format = digital.header_format_ofdm(occupied_carriers, 1, length_tag_key,)
@@ -202,6 +203,7 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.fft_vxx_1_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
         self.fft_vxx_0_0_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
         self.fft_vxx_0 = fft.fft_vcc(fft_len, False, (), True, 1)
+        self.epy_block_0 = epy_block_0.mac()
         self.digital_protocol_formatter_async_0 = digital.protocol_formatter_async(hdr_format)
         self.digital_packet_headerparser_b_0_0_0 = digital.packet_headerparser_b(header_formatter.base())
         self.digital_ofdm_sync_sc_cfb_0_0_0 = digital.ofdm_sync_sc_cfb(fft_len, fft_len//4, False, 0.9)
@@ -237,7 +239,7 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.blocks_repack_bits_bb_0_1_0_0 = blocks.repack_bits_bb(payload_mod.bits_per_symbol(), 8, packet_length_tag_key, True, gr.GR_LSB_FIRST)
         self.blocks_repack_bits_bb_0_0 = blocks.repack_bits_bb(8, 1, length_tag_key, False, gr.GR_LSB_FIRST)
         self.blocks_repack_bits_bb_0 = blocks.repack_bits_bb(8, payload_mod.bits_per_symbol(), length_tag_key, False, gr.GR_LSB_FIRST)
-        self.blocks_random_pdu_0_0 = blocks.random_pdu(119, 119, 0xff, 1)
+        self.blocks_random_pdu_0 = blocks.random_pdu(119, 119, 0xff, 1)
         self.blocks_pdu_to_tagged_stream_0_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
         self.blocks_pdu_to_tagged_stream_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
         self.blocks_multiply_xx_0_0_0 = blocks.multiply_vcc(1)
@@ -251,12 +253,13 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_random_pdu_0_0, 'pdus'), (self.blocks_message_debug_0, 'print_pdu'))
-        self.msg_connect((self.blocks_random_pdu_0_0, 'pdus'), (self.digital_protocol_formatter_async_0, 'in'))
-        self.msg_connect((self.blocks_tagged_stream_to_pdu_0, 'pdus'), (self.blocks_random_pdu_0_0, 'generate'))
+        self.msg_connect((self.blocks_tagged_stream_to_pdu_0, 'pdus'), (self.epy_block_0, 'packet'))
         self.msg_connect((self.digital_packet_headerparser_b_0_0_0, 'header_data'), (self.digital_header_payload_demux_0_0_0, 'header_data'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'payload'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'header'), (self.blocks_pdu_to_tagged_stream_0_0, 'pdus'))
+        self.msg_connect((self.epy_block_0, 'ack'), (self.blocks_message_debug_0, 'print_pdu'))
+        self.msg_connect((self.epy_block_0, 'ack'), (self.blocks_random_pdu_0, 'generate'))
+        self.msg_connect((self.epy_block_0, 'ack'), (self.digital_protocol_formatter_async_0, 'in'))
         self.connect((self.analog_frequency_modulator_fc_0_0_0, 0), (self.blocks_multiply_xx_0_0_0, 0))
         self.connect((self.blocks_delay_0_0_0, 0), (self.blocks_multiply_xx_0_0_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_tag_gate_0, 0))

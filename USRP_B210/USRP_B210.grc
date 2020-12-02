@@ -398,9 +398,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1299, 1217]
+    coordinate: [1300, 1216]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_message_strobe_0
   id: blocks_message_strobe
   parameters:
@@ -415,7 +415,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [310, 1597]
+    coordinate: [177, 1801]
     rotation: 0
     state: enabled
 - name: blocks_multiply_const_vxx_0
@@ -522,7 +522,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [222, 1892]
+    coordinate: [226, 1920]
     rotation: 0
     state: enabled
 - name: blocks_repack_bits_bb_0
@@ -1005,24 +1005,29 @@ blocks:
       \      self.message_port_register_in(gr.pmt.intern(\"ack\"))\n        self.set_msg_handler(gr.pmt.intern('time_unit'),\
       \ self.send_packet)\n        self.set_msg_handler(gr.pmt.intern('ack'), self.ack_handler)\n\
       \        self.sensing_input = 0\n        self.interation_wait_ack = 10 # interation_wait_ack\
-      \ * 3ms = 30ms waiting\n        self.packet_num_send = 1\n        self.packet_num_received\
-      \ = 1\n        \n    def ack_handler(self, msg):\n        \n        msg_vec\
-      \ = gr.pmt.car(msg)\n        msg_data = gr.pmt.write_string(msg_vec)\n     \
-      \   pattern = \"\\(packet_num \\. (.*?)\\)\\)\"\n        self.packet_num_received\
-      \ = int(re.search(pattern, msg_data).group(1))\n        \n        \n    def\
-      \ send_packet(self, msg):\n    \n        if (self.packet_num_received == self.packet_num_send):\n\
-      \            print(\"ACK of \" + str(self.packet_num_received) + \"Received\"\
-      )\n            self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message\
-      \ received!'))\n            self.packet_num_send += 1\n            self.interation_wait_ack\
-      \ = 10\n        \n        elif (self.interation_wait_ack > 0):\n           \
-      \ print(\"NACK of \" + str(self.packet_num_received) + \"Received\")\n     \
-      \       self.interation_wait_ack -= 1\n            \n        elif (self.interation_wait_ack\
-      \ == 0):\n            print(\"DROPPING\" + str(self.packet_num_received))\n\
-      \            self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message\
-      \ received!'))\n            self.packet_num_send += 1\n            self.interation_wait_ack\
-      \ = 10\n            \n        else:\n            return 0\n\n    def work(self,\
-      \ input_items, output_items):\n        self.sensing_input = input_items[0]\n\
-      \        return (len(input_items[0]))\n       \n  \n"
+      \ * 3ms = 30ms waiting\n        self.packet_num_send = -1\n        self.packet_num_received\
+      \ = 0\n        \n        \n    def ack_handler(self, msg):\n        \n     \
+      \   msg_vec = gr.pmt.car(msg)\n        msg_data = gr.pmt.write_string(msg_vec)\n\
+      \        #pattern = \"\\(contents \\. (.*?)\\)\\)\"\n        #self.packet_num_received\
+      \ = int(re.search(pattern, msg_data).group(1))\n        #print(\"The ack with\
+      \ number\" + str(self.packet_num_received ) + \"was recived\")\n        print(msg_data)\n\
+      \        \n        \n    def send_packet(self, msg):\n        self.packet_num_send\
+      \ += 1\n        print(\"The packet number\" + str(self.packet_num_send ) + \"\
+      was sending\")\n        self.message_port_pub(gr.pmt.intern('transmit_packet'),\
+      \ gr.pmt.intern('message received!'))\n\n        #if (self.packet_num_received\
+      \ == self.packet_num_send):\n            #print(\"ACK of \" + str(self.packet_num_received)\
+      \ + \"Received\")\n            #self.message_port_pub(gr.pmt.intern('transmit_packet'),\
+      \ gr.pmt.intern('message received!'))\n            #self.packet_num_send +=\
+      \ 1\n            #self.interation_wait_ack = 10\n        \n        #elif (self.interation_wait_ack\
+      \ > 0):\n            #print(\"NACK of \" + str(self.packet_num_received) + \"\
+      Received\")\n            #self.interation_wait_ack -= 1\n            \n    \
+      \    #elif (self.interation_wait_ack == 0):\n            #print(\"DROPPING\"\
+      \ + str(self.packet_num_received))\n            #self.message_port_pub(gr.pmt.intern('transmit_packet'),\
+      \ gr.pmt.intern('message received!'))\n            #self.packet_num_send +=\
+      \ 1\n            #self.interation_wait_ack = 10\n            \n        #else:\n\
+      \            #return 0 \n\n        \n    def work(self, input_items, output_items):\n\
+      \        self.sensing_input = input_items[0]\n        return (len(input_items[0]))\n\
+      \       \n  \n"
     affinity: ''
     alias: ''
     comment: ''
@@ -1034,9 +1039,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [986, 1505]
+    coordinate: [893, 1475]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: fft_vxx_0
   id: fft_vxx
   parameters:
@@ -2200,9 +2205,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [650, 1431]
+    coordinate: [677, 1434]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: virtual_source_0_0_1_0_0_0
   id: virtual_source
   parameters:
@@ -2249,7 +2254,7 @@ connections:
 - [blocks_complex_to_mag_1, '0', qtgui_number_sink_0, '0']
 - [blocks_complex_to_mag_1, '0', virtual_sink_1_0_0_0_2, '0']
 - [blocks_delay_0_0_0_0, '0', blocks_multiply_xx_0_0_0_0, '1']
-- [blocks_message_strobe_0, strobe, epy_block_0, time_unit]
+- [blocks_message_strobe_0, strobe, blocks_random_pdu_0, generate]
 - [blocks_multiply_const_vxx_0, '0', blocks_tag_gate_0, '0']
 - [blocks_multiply_const_vxx_0_0, '0', blocks_complex_to_mag_0, '0']
 - [blocks_multiply_xx_0_0_0_0, '0', digital_header_payload_demux_0_0_0_0, '0']
@@ -2266,7 +2271,6 @@ connections:
 - [blocks_tag_gate_0, '0', virtual_sink_0, '0']
 - [blocks_tagged_stream_mux_0, '0', virtual_sink_0_0_0, '0']
 - [blocks_tagged_stream_to_pdu_0_0, pdus, blocks_message_debug_0_0_0, print_pdu]
-- [blocks_tagged_stream_to_pdu_0_0, pdus, epy_block_0, ack]
 - [blocks_vector_to_stream_0, '0', blocks_complex_to_mag_1, '0']
 - [digital_chunks_to_symbols_xx_0, '0', blocks_tagged_stream_mux_0, '0']
 - [digital_chunks_to_symbols_xx_0_0, '0', blocks_tagged_stream_mux_0, '1']
@@ -2293,7 +2297,6 @@ connections:
   header_data]
 - [digital_protocol_formatter_async_0, header, blocks_pdu_to_tagged_stream_0_0, pdus]
 - [digital_protocol_formatter_async_0, payload, blocks_pdu_to_tagged_stream_0, pdus]
-- [epy_block_0, transmit_packet, blocks_random_pdu_0, generate]
 - [fft_vxx_0, '0', digital_ofdm_cyclic_prefixer_0, '0']
 - [fft_vxx_0_0_0_0_0, '0', digital_ofdm_chanest_vcvc_0_0_0_0, '0']
 - [fft_vxx_0_1, '0', blocks_vector_to_stream_0, '0']
