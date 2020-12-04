@@ -35,7 +35,7 @@ class mac(gr.sync_block):
         
         msg = gr.pmt.cons(gr.pmt.PMT_NIL, send_pmt)
 
-        print(self.packet_num_received)
+        print("ACK from packet number " + str(self.packet_num_received) + " sended")
 
         self.message_port_pub(gr.pmt.intern('ack'), msg)
 

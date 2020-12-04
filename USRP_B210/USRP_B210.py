@@ -40,6 +40,7 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import uhd
 import time
 from gnuradio.digital.utils import tagged_streams
+import epy_block_0
 
 from gnuradio import qtgui
 
@@ -87,13 +88,13 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         self.length_tag_key = length_tag_key = "packet_len"
         self.header_mod = header_mod = digital.constellation_bpsk()
         self.fft_len = fft_len = 64
-        self.tx_b210_g = tx_b210_g = 45
-        self.tx_b210_f = tx_b210_f = 700000000
+        self.tx_b210_g = tx_b210_g = 50
+        self.tx_b210_f = tx_b210_f = 2472000000
         self.sync_word2 = sync_word2 = [0, 0, 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 0, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 0, 0, 0, 0, 0]
         self.sync_word1 = sync_word1 = [0., 0., 0., 0., 0., 0., 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 0., 0., 0., 0., 0.]
-        self.samp_rate = samp_rate = 250000
-        self.rx_sensing_g = rx_sensing_g = 45
-        self.rx_sensing_f = rx_sensing_f = 600000000
+        self.samp_rate = samp_rate = 500000
+        self.rx_sensing_g = rx_sensing_g = 50
+        self.rx_sensing_f = rx_sensing_f = 2412000000
         self.rolloff = rolloff = 0
         self.payload_equalizer = payload_equalizer = digital.ofdm_equalizer_simpledfe(fft_len, payload_mod.base(), occupied_carriers, pilot_carriers, pilot_symbols, 1)
         self.packet_len = packet_len = 125
@@ -235,6 +236,7 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         self.fft_vxx_0_1 = fft.fft_vfc(fft_len, True, window.blackmanharris(fft_len), 1)
         self.fft_vxx_0_0_0_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
         self.fft_vxx_0 = fft.fft_vcc(fft_len, False, (), True, 1)
+        self.epy_block_0 = epy_block_0.mac()
         self.digital_protocol_formatter_async_0 = digital.protocol_formatter_async(hdr_format)
         self.digital_packet_headerparser_b_0_0_0_0 = digital.packet_headerparser_b(header_formatter.base())
         self.digital_ofdm_sync_sc_cfb_0_0_0_0 = digital.ofdm_sync_sc_cfb(fft_len, fft_len//4, False, 0.9)
@@ -278,8 +280,7 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         self.blocks_multiply_xx_0_0_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_cc(500)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(50e-3)
-        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("TEST"), 3)
-        self.blocks_message_debug_0_0_0 = blocks.message_debug()
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("TEST"), 2)
         self.blocks_delay_0_0_0_0 = blocks.delay(gr.sizeof_gr_complex*1, fft_len+fft_len//4)
         self.blocks_complex_to_mag_1 = blocks.complex_to_mag(1)
         self.blocks_complex_to_mag_0 = blocks.complex_to_mag(1)
@@ -290,14 +291,16 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.blocks_random_pdu_0, 'generate'))
+        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.epy_block_0, 'time_unit'))
         self.msg_connect((self.blocks_random_pdu_0, 'pdus'), (self.digital_protocol_formatter_async_0, 'in'))
-        self.msg_connect((self.blocks_tagged_stream_to_pdu_0_0, 'pdus'), (self.blocks_message_debug_0_0_0, 'print_pdu'))
+        self.msg_connect((self.blocks_tagged_stream_to_pdu_0_0, 'pdus'), (self.epy_block_0, 'ack'))
         self.msg_connect((self.digital_packet_headerparser_b_0_0_0_0, 'header_data'), (self.digital_header_payload_demux_0_0_0_0, 'header_data'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'payload'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'header'), (self.blocks_pdu_to_tagged_stream_0_0, 'pdus'))
+        self.msg_connect((self.epy_block_0, 'transmit_packet'), (self.blocks_random_pdu_0, 'generate'))
         self.connect((self.analog_frequency_modulator_fc_0_0_0_0, 0), (self.blocks_multiply_xx_0_0_0_0, 0))
         self.connect((self.blocks_complex_to_mag_0, 0), (self.blocks_stream_to_vector_0, 0))
+        self.connect((self.blocks_complex_to_mag_1, 0), (self.epy_block_0, 0))
         self.connect((self.blocks_complex_to_mag_1, 0), (self.qtgui_number_sink_0, 0))
         self.connect((self.blocks_delay_0_0_0_0, 0), (self.blocks_multiply_xx_0_0_0_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_tag_gate_0, 0))

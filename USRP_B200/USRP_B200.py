@@ -28,7 +28,6 @@ from gnuradio.filter import firdes
 import sip
 from gnuradio import analog
 from gnuradio import blocks
-import pmt
 from gnuradio import digital
 from gnuradio import fft
 from gnuradio.fft import window
@@ -88,13 +87,13 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.length_tag_key = length_tag_key = "packet_len"
         self.header_mod = header_mod = digital.constellation_bpsk()
         self.fft_len = fft_len = 64
-        self.tx_b200_g = tx_b200_g = 45
-        self.tx_b200_f = tx_b200_f = 600000000
+        self.tx_b200_g = tx_b200_g = 50
+        self.tx_b200_f = tx_b200_f = 2412000000
         self.sync_word2 = sync_word2 = [0, 0, 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 0, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 0, 0, 0, 0, 0]
         self.sync_word1 = sync_word1 = [0., 0., 0., 0., 0., 0., 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 0., 0., 0., 0., 0.]
-        self.samp_rate = samp_rate = 250000
-        self.rx_b200_g = rx_b200_g = 45
-        self.rx_b200_f = rx_b200_f = 700000000
+        self.samp_rate = samp_rate = 500000
+        self.rx_b200_g = rx_b200_g = 50
+        self.rx_b200_f = rx_b200_f = 2472000000
         self.rolloff = rolloff = 0
         self.payload_equalizer = payload_equalizer = digital.ofdm_equalizer_simpledfe(fft_len, payload_mod.base(), occupied_carriers, pilot_carriers, pilot_symbols, 1)
         self.packet_len = packet_len = 125
@@ -239,7 +238,6 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.blocks_repack_bits_bb_0_1_0_0 = blocks.repack_bits_bb(payload_mod.bits_per_symbol(), 8, packet_length_tag_key, True, gr.GR_LSB_FIRST)
         self.blocks_repack_bits_bb_0_0 = blocks.repack_bits_bb(8, 1, length_tag_key, False, gr.GR_LSB_FIRST)
         self.blocks_repack_bits_bb_0 = blocks.repack_bits_bb(8, payload_mod.bits_per_symbol(), length_tag_key, False, gr.GR_LSB_FIRST)
-        self.blocks_random_pdu_0 = blocks.random_pdu(119, 119, 0xff, 1)
         self.blocks_pdu_to_tagged_stream_0_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
         self.blocks_pdu_to_tagged_stream_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
         self.blocks_multiply_xx_0_0_0 = blocks.multiply_vcc(1)
@@ -258,7 +256,6 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.msg_connect((self.digital_protocol_formatter_async_0, 'payload'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'header'), (self.blocks_pdu_to_tagged_stream_0_0, 'pdus'))
         self.msg_connect((self.epy_block_0, 'ack'), (self.blocks_message_debug_0, 'print_pdu'))
-        self.msg_connect((self.epy_block_0, 'ack'), (self.blocks_random_pdu_0, 'generate'))
         self.msg_connect((self.epy_block_0, 'ack'), (self.digital_protocol_formatter_async_0, 'in'))
         self.connect((self.analog_frequency_modulator_fc_0_0_0, 0), (self.blocks_multiply_xx_0_0_0, 0))
         self.connect((self.blocks_delay_0_0_0, 0), (self.blocks_multiply_xx_0_0_0, 1))

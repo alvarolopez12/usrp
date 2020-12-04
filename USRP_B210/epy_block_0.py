@@ -26,17 +26,27 @@ class mac(gr.sync_block):
         
     def ack_handler(self, msg):
         
-        msg_vec = gr.pmt.car(msg)
-        msg_data = gr.pmt.write_string(msg_vec)
-        #pattern = "\(contents \. (.*?)\)\)"
-        #self.packet_num_received = int(re.search(pattern, msg_data).group(1))
-        #print("The ack with number" + str(self.packet_num_received ) + "was recived")
-        print(msg_data)
+        msg_vec = gr.pmt.cdr(msg)
+
+        # Convert the PMT vector into a Python list
+        msg_data = []
+        for i in range(48):
+            msg_data.append(gr.pmt.u8vector_ref(msg_vec, i))
+            
+        a = 0           
+        for i in msg_data[1:]:
+            a = a + i
         
+        self.packet_num_received =  a * 255 + msg_data[0]
+
+        print(self.packet_num_received )
+                
         
     def send_packet(self, msg):
+    
+        
         self.packet_num_send += 1
-        print("The packet number" + str(self.packet_num_send ) + "was sending")
+        #print("The packet number" + str(self.packet_num_send ) + "was sending")
         self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message received!'))
 
         #if (self.packet_num_received == self.packet_num_send):
