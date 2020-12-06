@@ -280,7 +280,7 @@ class USRP_B210(gr.top_block, Qt.QWidget):
         self.blocks_multiply_xx_0_0_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0_0 = blocks.multiply_const_cc(500)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(50e-3)
-        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("TEST"), 2)
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("TEST"), 1)
         self.blocks_delay_0_0_0_0 = blocks.delay(gr.sizeof_gr_complex*1, fft_len+fft_len//4)
         self.blocks_complex_to_mag_1 = blocks.complex_to_mag(1)
         self.blocks_complex_to_mag_0 = blocks.complex_to_mag(1)

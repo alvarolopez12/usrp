@@ -385,7 +385,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [656, 1776]
+    coordinate: [549, 1778]
     rotation: 0
     state: disabled
 - name: blocks_message_debug_0_0_0
@@ -410,7 +410,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     msg: pmt.intern("TEST")
-    period: '2'
+    period: '1'
   states:
     bus_sink: false
     bus_source: false
