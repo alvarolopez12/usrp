@@ -19,9 +19,10 @@ class mac(gr.sync_block):
         self.set_msg_handler(gr.pmt.intern('time_unit'), self.send_packet)
         self.set_msg_handler(gr.pmt.intern('ack'), self.ack_handler)
         self.sensing_input = 0
-        self.interation_wait_ack = 10 # interation_wait_ack * 3ms = 30ms waiting
-        self.packet_num_send = -1
-        self.packet_num_received = 0
+        self.interation_wait_ack = 30 # interation_wait_ack * 3ms = 30ms waiting
+        self.packet_num_send = 0
+        self.packet_num_received = -1
+        self.transmit = True
         
         
     def ack_handler(self, msg):
@@ -39,38 +40,54 @@ class mac(gr.sync_block):
         
         self.packet_num_received =  a * 255 + msg_data[0]
 
-        print(self.packet_num_received )
+        # print(self.packet_num_received)
                 
         
     def send_packet(self, msg):
     
+        # White space and ACK of the last packet received
+        if (self.sensing_input < 3000 and self.transmit == True):
         
-        self.packet_num_send += 1
-        #print("The packet number" + str(self.packet_num_send ) + "was sending")
-        self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message received!'))
-
-        #if (self.packet_num_received == self.packet_num_send):
-            #print("ACK of " + str(self.packet_num_received) + "Received")
-            #self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message received!'))
-            #self.packet_num_send += 1
-            #self.interation_wait_ack = 10
+            # Set up the pdu body with the number of the packet
+            send_str = self.packet_num_send.to_bytes(48, 'little', signed=True) 
+            send_pmt = gr.pmt.make_u8vector(len(send_str), 0)
         
-        #elif (self.interation_wait_ack > 0):
-            #print("NACK of " + str(self.packet_num_received) + "Received")
-            #self.interation_wait_ack -= 1
+            for i in range(len(send_str)):
+                gr.pmt.u8vector_set(send_pmt, i, send_str[i])
+        
+            msg = gr.pmt.cons(gr.pmt.PMT_NIL, send_pmt)   
+            self.message_port_pub(gr.pmt.intern('transmit_packet'), msg)
             
-        #elif (self.interation_wait_ack == 0):
-            #print("DROPPING" + str(self.packet_num_received))
-            #self.message_port_pub(gr.pmt.intern('transmit_packet'), gr.pmt.intern('message received!'))
-            #self.packet_num_send += 1
-            #self.interation_wait_ack = 10
-            
-        #else:
-            #return 0 
+            # Decrease the time out in one unit, take down the transmit flag and print sended packet number
+            self.interation_wait_ack -= 1
+            self.transmit = False
+            print ("Transimitting packet number " + str(self.packet_num_send))
 
+        # Spectrum busy
+        elif self.sensing_input > 3000:
+            print ("Waiting for the whitespace in the channel")
+            
+        # ACK Received, reestablish time out, increase packet number and flag
+        elif (self.packet_num_received == self.packet_num_send):
+            self.interation_wait_ack = 30
+            self.packet_num_send += 1
+            self.transmit = True
+            print ("ACK of " + str(self.packet_num_send) + " received")
+        
+        elif (self.interation_wait_ack > 0 and self.packet_num_received != self.packet_num_send):
+            self.interation_wait_ack -= 1
+            self.transmit = False
+        
+        else:
+            self.transmit = True
+            print ("NACK of " + str(self.packet_num_send) + " received")
+            print ("Retransmitting packet number " + str(self.packet_num_send))
+            
         
     def work(self, input_items, output_items):
-        self.sensing_input = input_items[0]
+        self.sensing_input = sum(input_items[0]) / len(input_items[0]) 
         return (len(input_items[0]))
+        
        
   
+

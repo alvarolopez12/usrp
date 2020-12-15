@@ -88,12 +88,12 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.header_mod = header_mod = digital.constellation_bpsk()
         self.fft_len = fft_len = 64
         self.tx_b200_g = tx_b200_g = 50
-        self.tx_b200_f = tx_b200_f = 2412000000
+        self.tx_b200_f = tx_b200_f = 600000000
         self.sync_word2 = sync_word2 = [0, 0, 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 0, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 0, 0, 0, 0, 0]
         self.sync_word1 = sync_word1 = [0., 0., 0., 0., 0., 0., 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 0., 0., 0., 0., 0.]
         self.samp_rate = samp_rate = 500000
         self.rx_b200_g = rx_b200_g = 50
-        self.rx_b200_f = rx_b200_f = 2472000000
+        self.rx_b200_f = rx_b200_f = 650000000
         self.rolloff = rolloff = 0
         self.payload_equalizer = payload_equalizer = digital.ofdm_equalizer_simpledfe(fft_len, payload_mod.base(), occupied_carriers, pilot_carriers, pilot_symbols, 1)
         self.packet_len = packet_len = 125
@@ -242,7 +242,6 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.blocks_pdu_to_tagged_stream_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
         self.blocks_multiply_xx_0_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(50e-3)
-        self.blocks_message_debug_0 = blocks.message_debug()
         self.blocks_delay_0_0_0 = blocks.delay(gr.sizeof_gr_complex*1, fft_len+fft_len//4)
         self.analog_frequency_modulator_fc_0_0_0 = analog.frequency_modulator_fc(-2.0/fft_len)
 
@@ -255,7 +254,6 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.msg_connect((self.digital_packet_headerparser_b_0_0_0, 'header_data'), (self.digital_header_payload_demux_0_0_0, 'header_data'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'payload'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'header'), (self.blocks_pdu_to_tagged_stream_0_0, 'pdus'))
-        self.msg_connect((self.epy_block_0, 'ack'), (self.blocks_message_debug_0, 'print_pdu'))
         self.msg_connect((self.epy_block_0, 'ack'), (self.digital_protocol_formatter_async_0, 'in'))
         self.connect((self.analog_frequency_modulator_fc_0_0_0, 0), (self.blocks_multiply_xx_0_0_0, 0))
         self.connect((self.blocks_delay_0_0_0, 0), (self.blocks_multiply_xx_0_0_0, 1))
@@ -266,13 +264,13 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_repack_bits_bb_0, 0), (self.digital_chunks_to_symbols_xx_0_0, 0))
         self.connect((self.blocks_repack_bits_bb_0_0, 0), (self.digital_chunks_to_symbols_xx_0, 0))
         self.connect((self.blocks_repack_bits_bb_0_1_0_0, 0), (self.blocks_tag_debug_1_0_0, 0))
+        self.connect((self.blocks_repack_bits_bb_0_1_0_0, 0), (self.blocks_tagged_stream_to_pdu_0, 0))
         self.connect((self.blocks_tag_gate_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_ofdm_carrier_allocator_cvc_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.blocks_tagged_stream_mux_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0_0, 0), (self.blocks_tagged_stream_mux_0, 1))
         self.connect((self.digital_constellation_decoder_cb_0_0_0, 0), (self.digital_packet_headerparser_b_0_0_0, 0))
         self.connect((self.digital_constellation_decoder_cb_1_0_0, 0), (self.blocks_repack_bits_bb_0_1_0_0, 0))
-        self.connect((self.digital_constellation_decoder_cb_1_0_0, 0), (self.blocks_tagged_stream_to_pdu_0, 0))
         self.connect((self.digital_header_payload_demux_0_0_0, 0), (self.fft_vxx_0_0_0_0, 0))
         self.connect((self.digital_header_payload_demux_0_0_0, 1), (self.fft_vxx_1_0_0, 0))
         self.connect((self.digital_ofdm_carrier_allocator_cvc_0, 0), (self.fft_vxx_0, 0))

@@ -212,7 +212,7 @@ blocks:
     gui_hint: ''
     label: B210 FREQ RX SENSING
     type: int
-    value: '2412000000'
+    value: '600000000'
   states:
     bus_sink: false
     bus_source: false
@@ -285,7 +285,7 @@ blocks:
     gui_hint: ''
     label: B210 FREQ TX SU
     type: int
-    value: '2472000000'
+    value: '650000000'
   states:
     bus_sink: false
     bus_source: false
@@ -398,7 +398,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1301, 1216]
+    coordinate: [1284, 1350]
     rotation: 0
     state: disabled
 - name: blocks_message_strobe_0
@@ -524,7 +524,7 @@ blocks:
     bus_structure: null
     coordinate: [226, 1920]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_repack_bits_bb_0
   id: blocks_repack_bits_bb
   parameters:
@@ -1004,39 +1004,49 @@ blocks:
       ))\n        self.message_port_register_in(gr.pmt.intern(\"time_unit\"))\n  \
       \      self.message_port_register_in(gr.pmt.intern(\"ack\"))\n        self.set_msg_handler(gr.pmt.intern('time_unit'),\
       \ self.send_packet)\n        self.set_msg_handler(gr.pmt.intern('ack'), self.ack_handler)\n\
-      \        self.sensing_input = 0\n        self.interation_wait_ack = 10 # interation_wait_ack\
-      \ * 3ms = 30ms waiting\n        self.packet_num_send = -1\n        self.packet_num_received\
-      \ = 0\n        \n        \n    def ack_handler(self, msg):\n        \n     \
-      \   msg_vec = gr.pmt.cdr(msg)\n\n        # Convert the PMT vector into a Python\
-      \ list\n        msg_data = []\n        for i in range(48):\n            msg_data.append(gr.pmt.u8vector_ref(msg_vec,\
-      \ i))\n            \n        a = 0           \n        for i in msg_data[1:]:\n\
-      \            a = a + i\n        \n        self.packet_num_received =  a * 255\
-      \ + msg_data[0]\n\n        print(self.packet_num_received )\n              \
-      \  \n        \n    def send_packet(self, msg):\n    \n        \n        self.packet_num_send\
-      \ += 1\n        #print(\"The packet number\" + str(self.packet_num_send ) +\
-      \ \"was sending\")\n        self.message_port_pub(gr.pmt.intern('transmit_packet'),\
-      \ gr.pmt.intern('message received!'))\n\n        #if (self.packet_num_received\
-      \ == self.packet_num_send):\n            #print(\"ACK of \" + str(self.packet_num_received)\
-      \ + \"Received\")\n            #self.message_port_pub(gr.pmt.intern('transmit_packet'),\
-      \ gr.pmt.intern('message received!'))\n            #self.packet_num_send +=\
-      \ 1\n            #self.interation_wait_ack = 10\n        \n        #elif (self.interation_wait_ack\
-      \ > 0):\n            #print(\"NACK of \" + str(self.packet_num_received) + \"\
-      Received\")\n            #self.interation_wait_ack -= 1\n            \n    \
-      \    #elif (self.interation_wait_ack == 0):\n            #print(\"DROPPING\"\
-      \ + str(self.packet_num_received))\n            #self.message_port_pub(gr.pmt.intern('transmit_packet'),\
-      \ gr.pmt.intern('message received!'))\n            #self.packet_num_send +=\
-      \ 1\n            #self.interation_wait_ack = 10\n            \n        #else:\n\
-      \            #return 0 \n\n        \n    def work(self, input_items, output_items):\n\
-      \        self.sensing_input = input_items[0]\n        return (len(input_items[0]))\n\
-      \       \n  \n"
+      \        self.sensing_input = 0\n        self.interation_wait_ack = 30 # interation_wait_ack\
+      \ * 3ms = 30ms waiting\n        self.packet_num_send = 0\n        self.packet_num_received\
+      \ = -1\n        self.transmit = True\n        \n        \n    def ack_handler(self,\
+      \ msg):\n        \n        msg_vec = gr.pmt.cdr(msg)\n\n        # Convert the\
+      \ PMT vector into a Python list\n        msg_data = []\n        for i in range(48):\n\
+      \            msg_data.append(gr.pmt.u8vector_ref(msg_vec, i))\n            \n\
+      \        a = 0           \n        for i in msg_data[1:]:\n            a = a\
+      \ + i\n        \n        self.packet_num_received =  a * 255 + msg_data[0]\n\
+      \n        # print(self.packet_num_received)\n                \n        \n  \
+      \  def send_packet(self, msg):\n    \n        # White space and ACK of the last\
+      \ packet received\n        if (self.sensing_input < 3000 and self.transmit ==\
+      \ True):\n        \n            # Set up the pdu body with the number of the\
+      \ packet\n            send_str = self.packet_num_send.to_bytes(48, 'little',\
+      \ signed=True) \n            send_pmt = gr.pmt.make_u8vector(len(send_str),\
+      \ 0)\n        \n            for i in range(len(send_str)):\n               \
+      \ gr.pmt.u8vector_set(send_pmt, i, send_str[i])\n        \n            msg =\
+      \ gr.pmt.cons(gr.pmt.PMT_NIL, send_pmt)   \n            self.message_port_pub(gr.pmt.intern('transmit_packet'),\
+      \ msg)\n            \n            # Decrease the time out in one unit, take\
+      \ down the transmit flag and print sended packet number\n            self.interation_wait_ack\
+      \ -= 1\n            self.transmit = False\n            print (\"Transimitting\
+      \ packet number \" + str(self.packet_num_send))\n\n        # Spectrum busy\n\
+      \        elif self.sensing_input > 3000:\n            print (\"Waiting for the\
+      \ whitespace in the channel\")\n            \n        # ACK Received, reestablish\
+      \ time out, increase packet number and flag\n        elif (self.packet_num_received\
+      \ == self.packet_num_send):\n            self.interation_wait_ack = 30\n   \
+      \         self.packet_num_send += 1\n            self.transmit = True\n    \
+      \        print (\"ACK of \" + str(self.packet_num_send) + \" received\")\n \
+      \       \n        elif (self.interation_wait_ack > 0 and self.packet_num_received\
+      \ != self.packet_num_send):\n            self.interation_wait_ack -= 1\n   \
+      \         self.transmit = False\n        \n        else:\n            self.transmit\
+      \ = True\n            print (\"NACK of \" + str(self.packet_num_send) + \" received\"\
+      )\n            print (\"Retransmitting packet number \" + str(self.packet_num_send))\n\
+      \            \n        \n    def work(self, input_items, output_items):\n  \
+      \      self.sensing_input = sum(input_items[0]) / len(input_items[0]) \n   \
+      \     return (len(input_items[0]))\n        \n       \n  \n\n"
     affinity: ''
     alias: ''
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('MAC', 'mac', [], [('0', 'float', 1), ('time_unit', 'message', 1),
-      ('ack', 'message', 1)], [('transmit_packet', 'message', 1)], '', [])
+    _io_cache: ('MAC', 'mac', [], [('0', 'float', 1), ('ack', 'message', 1), ('time_unit',
+      'message', 1)], [('transmit_packet', 'message', 1)], '', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
@@ -2271,7 +2281,6 @@ connections:
 - [blocks_tag_gate_0, '0', uhd_usrp_sink_0, '0']
 - [blocks_tag_gate_0, '0', virtual_sink_0, '0']
 - [blocks_tagged_stream_mux_0, '0', virtual_sink_0_0_0, '0']
-- [blocks_tagged_stream_to_pdu_0_0, pdus, blocks_message_debug_0_0_0, print_pdu]
 - [blocks_tagged_stream_to_pdu_0_0, pdus, epy_block_0, ack]
 - [blocks_vector_to_stream_0, '0', blocks_complex_to_mag_1, '0']
 - [digital_chunks_to_symbols_xx_0, '0', blocks_tagged_stream_mux_0, '0']
@@ -2299,7 +2308,9 @@ connections:
   header_data]
 - [digital_protocol_formatter_async_0, header, blocks_pdu_to_tagged_stream_0_0, pdus]
 - [digital_protocol_formatter_async_0, payload, blocks_pdu_to_tagged_stream_0, pdus]
+- [epy_block_0, transmit_packet, blocks_message_debug_0_0_0, print_pdu]
 - [epy_block_0, transmit_packet, blocks_random_pdu_0, generate]
+- [epy_block_0, transmit_packet, digital_protocol_formatter_async_0, in]
 - [fft_vxx_0, '0', digital_ofdm_cyclic_prefixer_0, '0']
 - [fft_vxx_0_0_0_0_0, '0', digital_ofdm_chanest_vcvc_0_0_0_0, '0']
 - [fft_vxx_0_1, '0', blocks_vector_to_stream_0, '0']
