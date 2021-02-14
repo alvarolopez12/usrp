@@ -10,7 +10,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: USRP_B210
+    id: STX_B210
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -21,7 +21,7 @@ options:
     run_options: run
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: USRP_B210
+    title: STX_B210
     window_size: 1280, 1024
   states:
     bus_sink: false
@@ -205,36 +205,6 @@ blocks:
     coordinate: [988, 23]
     rotation: 0
     state: enabled
-- name: rx_sensing_f
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: B210 FREQ RX SENSING
-    type: int
-    value: '600000000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1703, 48]
-    rotation: 0
-    state: enabled
-- name: rx_sensing_g
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: B210 GAIN RX SENSING
-    type: int
-    value: '50'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1693, 123]
-    rotation: 0
-    state: enabled
 - name: samp_rate
   id: variable
   parameters:
@@ -245,6 +215,66 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [339, 19]
+    rotation: 0
+    state: enabled
+- name: stx_downstream_freq
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: SECUNDARY TX DOWNSTREAM FREQ
+    type: int
+    value: '2410000000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1583, 46]
+    rotation: 0
+    state: enabled
+- name: stx_downstream_gain
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: SECUNDARY TX DOWNSTREAM GAIN
+    type: real
+    value: '50'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1584, 134]
+    rotation: 0
+    state: enabled
+- name: stx_upstream_freq
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: SECUNDARY TX UPSTREAM FREQ
+    type: int
+    value: '2400000000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1798, 43]
+    rotation: 0
+    state: enabled
+- name: stx_upstream_gain
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: SECUNDARY TX UPSTREAM GAIN
+    type: int
+    value: '50'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1802, 136]
     rotation: 0
     state: enabled
 - name: sync_word1
@@ -278,36 +308,6 @@ blocks:
     coordinate: [394, 80]
     rotation: 0
     state: enabled
-- name: tx_b210_f
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: B210 FREQ TX SU
-    type: int
-    value: '650000000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1549, 51]
-    rotation: 0
-    state: enabled
-- name: tx_b210_g
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: B210 GAIN TX SU
-    type: int
-    value: '50'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1550, 121]
-    rotation: 0
-    state: enabled
 - name: analog_frequency_modulator_fc_0_0_0_0
   id: analog_frequency_modulator_fc
   parameters:
@@ -339,7 +339,7 @@ blocks:
     bus_structure: null
     coordinate: [941, 310]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_complex_to_mag_1
   id: blocks_complex_to_mag
   parameters:
@@ -355,7 +355,7 @@ blocks:
     bus_structure: null
     coordinate: [1458, 323]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_delay_0_0_0_0
   id: blocks_delay
   parameters:
@@ -398,9 +398,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1284, 1350]
+    coordinate: [1232, 1225]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_message_strobe_0
   id: blocks_message_strobe
   parameters:
@@ -415,7 +415,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [609, 1523]
+    coordinate: [587, 1551]
     rotation: 0
     state: enabled
 - name: blocks_multiply_const_vxx_0
@@ -433,7 +433,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1124, 2206]
+    coordinate: [1133, 2219]
     rotation: 0
     state: enabled
 - name: blocks_multiply_const_vxx_0_0
@@ -453,7 +453,7 @@ blocks:
     bus_structure: null
     coordinate: [941, 354]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_xx_0_0_0_0
   id: blocks_multiply_xx
   parameters:
@@ -524,7 +524,7 @@ blocks:
     bus_structure: null
     coordinate: [226, 1920]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_repack_bits_bb_0
   id: blocks_repack_bits_bb
   parameters:
@@ -602,7 +602,7 @@ blocks:
     bus_structure: null
     coordinate: [942, 263]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_tag_debug_1_0_0_0
   id: blocks_tag_debug
   parameters:
@@ -695,7 +695,7 @@ blocks:
     bus_structure: null
     coordinate: [1338, 262]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_chunks_to_symbols_xx_0
   id: digital_chunks_to_symbols_xx
   parameters:
@@ -813,7 +813,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [524, 2272]
+    coordinate: [488, 2296]
     rotation: 0
     state: enabled
 - name: digital_ofdm_chanest_vcvc_0_0_0_0
@@ -1004,7 +1004,7 @@ blocks:
       ))\n        self.message_port_register_in(gr.pmt.intern(\"time_unit\"))\n  \
       \      self.message_port_register_in(gr.pmt.intern(\"ack\"))\n        self.set_msg_handler(gr.pmt.intern('time_unit'),\
       \ self.send_packet)\n        self.set_msg_handler(gr.pmt.intern('ack'), self.ack_handler)\n\
-      \        self.sensing_input = 0\n        self.interation_wait_ack = 30 # interation_wait_ack\
+      \        self.sensing_input = 0\n        self.interation_wait_ack = 300 # interation_wait_ack\
       \ * 3ms = 30ms waiting\n        self.packet_num_send = 0\n        self.packet_num_received\
       \ = -1\n        self.transmit = True\n        \n        \n    def ack_handler(self,\
       \ msg):\n        \n        msg_vec = gr.pmt.cdr(msg)\n\n        # Convert the\
@@ -1028,10 +1028,10 @@ blocks:
       \        elif self.sensing_input > 3000:\n            print (\"Waiting for the\
       \ whitespace in the channel\")\n            \n        # ACK Received, reestablish\
       \ time out, increase packet number and flag\n        elif (self.packet_num_received\
-      \ == self.packet_num_send):\n            self.interation_wait_ack = 30\n   \
-      \         self.packet_num_send += 1\n            self.transmit = True\n    \
-      \        print (\"ACK of \" + str(self.packet_num_send) + \" received\")\n \
-      \       \n        elif (self.interation_wait_ack > 0 and self.packet_num_received\
+      \ == self.packet_num_send):\n            self.interation_wait_ack = 300\n  \
+      \          self.packet_num_send += 1\n            self.transmit = True\n   \
+      \         print (\"ACK of \" + str(self.packet_num_send) + \" received\")\n\
+      \        \n        elif (self.interation_wait_ack > 0 and self.packet_num_received\
       \ != self.packet_num_send):\n            self.interation_wait_ack -= 1\n   \
       \         self.transmit = False\n        \n        else:\n            self.transmit\
       \ = True\n            print (\"NACK of \" + str(self.packet_num_send) + \" received\"\
@@ -1045,14 +1045,14 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
-    _io_cache: ('MAC', 'mac', [], [('0', 'float', 1), ('ack', 'message', 1), ('time_unit',
-      'message', 1)], [('transmit_packet', 'message', 1)], '', [])
+    _io_cache: ('MAC', 'mac', [], [('0', 'float', 1), ('time_unit', 'message', 1),
+      ('ack', 'message', 1)], [('transmit_packet', 'message', 1)], '', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [941, 1477]
+    coordinate: [937, 1460]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: fft_vxx_0
   id: fft_vxx
   parameters:
@@ -1071,7 +1071,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [752, 2283]
+    coordinate: [725, 2314]
     rotation: 0
     state: enabled
 - name: fft_vxx_0_0_0_0_0
@@ -1115,7 +1115,7 @@ blocks:
     bus_structure: null
     coordinate: [1114, 242]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: fft_vxx_1_0_0_0
   id: fft_vxx
   parameters:
@@ -1194,7 +1194,7 @@ blocks:
     color9: '"dark green"'
     comment: ''
     ctrlpanel: 'False'
-    fc: rx_sensing_f
+    fc: stx_downstream_freq
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
@@ -1213,7 +1213,7 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: B210 RX SENSING
+    name: SECUNDARY TX B210 DOWNSTREAM
     nconnections: '1'
     showports: 'False'
     tr_chan: '0'
@@ -1305,7 +1305,7 @@ blocks:
     bus_structure: null
     coordinate: [1634, 277]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_0_0
   id: qtgui_time_sink_x
   parameters:
@@ -1472,7 +1472,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: tx_b210_f
+    center_freq0: stx_upstream_freq
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1516,7 +1516,7 @@ blocks:
     comment: ''
     dev_addr: serial=31E344A
     dev_args: '""'
-    gain0: tx_b210_g
+    gain0: stx_upstream_gain
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -1748,7 +1748,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: rx_sensing_f
+    center_freq0: stx_downstream_freq
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1824,7 +1824,7 @@ blocks:
     dc_offs_enb9: '""'
     dev_addr: serial=31E344A
     dev_args: '""'
-    gain0: rx_sensing_g
+    gain0: stx_downstream_gain
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -2047,7 +2047,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [147, 354]
+    coordinate: [147, 364]
     rotation: 0
     state: true
 - name: virtual_sink_0
@@ -2140,7 +2140,7 @@ blocks:
     bus_structure: null
     coordinate: [1626, 370]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: virtual_sink_1_1_0_0
   id: virtual_sink
   parameters:
@@ -2190,7 +2190,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [281, 2308]
+    coordinate: [217, 2359]
     rotation: 0
     state: enabled
 - name: virtual_source_0_0_0_0_0_1_0
@@ -2205,7 +2205,7 @@ blocks:
     bus_structure: null
     coordinate: [689, 270]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: virtual_source_0_0_0_0_0_1_0_0
   id: virtual_source
   parameters:
@@ -2218,7 +2218,7 @@ blocks:
     bus_structure: null
     coordinate: [631, 1422]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: virtual_source_0_0_1_0_0_0
   id: virtual_source
   parameters:
@@ -2265,6 +2265,7 @@ connections:
 - [blocks_complex_to_mag_1, '0', qtgui_number_sink_0, '0']
 - [blocks_complex_to_mag_1, '0', virtual_sink_1_0_0_0_2, '0']
 - [blocks_delay_0_0_0_0, '0', blocks_multiply_xx_0_0_0_0, '1']
+- [blocks_message_strobe_0, strobe, blocks_random_pdu_0, generate]
 - [blocks_message_strobe_0, strobe, epy_block_0, time_unit]
 - [blocks_multiply_const_vxx_0, '0', blocks_tag_gate_0, '0']
 - [blocks_multiply_const_vxx_0_0, '0', blocks_complex_to_mag_0, '0']
@@ -2281,6 +2282,7 @@ connections:
 - [blocks_tag_gate_0, '0', uhd_usrp_sink_0, '0']
 - [blocks_tag_gate_0, '0', virtual_sink_0, '0']
 - [blocks_tagged_stream_mux_0, '0', virtual_sink_0_0_0, '0']
+- [blocks_tagged_stream_to_pdu_0_0, pdus, blocks_message_debug_0_0_0, print_pdu]
 - [blocks_tagged_stream_to_pdu_0_0, pdus, epy_block_0, ack]
 - [blocks_vector_to_stream_0, '0', blocks_complex_to_mag_1, '0']
 - [digital_chunks_to_symbols_xx_0, '0', blocks_tagged_stream_mux_0, '0']
@@ -2308,7 +2310,6 @@ connections:
   header_data]
 - [digital_protocol_formatter_async_0, header, blocks_pdu_to_tagged_stream_0_0, pdus]
 - [digital_protocol_formatter_async_0, payload, blocks_pdu_to_tagged_stream_0, pdus]
-- [epy_block_0, transmit_packet, blocks_message_debug_0_0_0, print_pdu]
 - [epy_block_0, transmit_packet, blocks_random_pdu_0, generate]
 - [epy_block_0, transmit_packet, digital_protocol_formatter_async_0, in]
 - [fft_vxx_0, '0', digital_ofdm_cyclic_prefixer_0, '0']

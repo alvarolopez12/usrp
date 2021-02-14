@@ -19,7 +19,7 @@ class mac(gr.sync_block):
         self.set_msg_handler(gr.pmt.intern('time_unit'), self.send_packet)
         self.set_msg_handler(gr.pmt.intern('ack'), self.ack_handler)
         self.sensing_input = 0
-        self.interation_wait_ack = 30 # interation_wait_ack * 3ms = 30ms waiting
+        self.interation_wait_ack = 300 # interation_wait_ack * 3ms = 30ms waiting
         self.packet_num_send = 0
         self.packet_num_received = -1
         self.transmit = True
@@ -69,7 +69,7 @@ class mac(gr.sync_block):
             
         # ACK Received, reestablish time out, increase packet number and flag
         elif (self.packet_num_received == self.packet_num_send):
-            self.interation_wait_ack = 30
+            self.interation_wait_ack = 300
             self.packet_num_send += 1
             self.transmit = True
             print ("ACK of " + str(self.packet_num_send) + " received")

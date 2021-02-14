@@ -10,7 +10,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: USRP_B200
+    id: PRX_B200
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -21,7 +21,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: USRP_B200
+    title: PRX_B200
     window_size: ''
   states:
     bus_sink: false
@@ -193,6 +193,66 @@ blocks:
     coordinate: [801, 68]
     rotation: 0
     state: enabled
+- name: prx_downstream_freq
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: PRIMARY RX DOWNSTREAM FREQ
+    type: int
+    value: '2400000000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1840, 41]
+    rotation: 0
+    state: enabled
+- name: prx_downstream_gain
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: PRIMARY RX DOWNSTREAM GAIN
+    type: int
+    value: '50'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1842, 139]
+    rotation: 0
+    state: enabled
+- name: prx_upstream_freq
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: PRIMARY RX UPSTREAM FREQ
+    type: int
+    value: '2410000000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1631, 48]
+    rotation: 0
+    state: enabled
+- name: prx_upstream_gain
+  id: variable_qtgui_entry
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: PRIMARY RX UPSTREAM GAIN
+    type: int
+    value: '50'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1632, 132]
+    rotation: 0
+    state: enabled
 - name: rolloff
   id: variable
   parameters:
@@ -203,36 +263,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [930, 11]
-    rotation: 0
-    state: enabled
-- name: rx_b200_f
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: B200 FREQ RX SU
-    type: int
-    value: '650000000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1780, 48]
-    rotation: 0
-    state: enabled
-- name: rx_b200_g
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: B200 GAIN RX SU
-    type: int
-    value: '50'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1789, 134]
     rotation: 0
     state: enabled
 - name: samp_rate
@@ -276,36 +306,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [336, 68]
-    rotation: 0
-    state: enabled
-- name: tx_b200_f
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: B200 FREQ TX PU
-    type: int
-    value: '600000000'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1631, 48]
-    rotation: 0
-    state: enabled
-- name: tx_b200_g
-  id: variable_qtgui_entry
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: B200 GAIN TX PU
-    type: int
-    value: '50'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1632, 132]
     rotation: 0
     state: enabled
 - name: analog_frequency_modulator_fc_0_0_0
@@ -442,9 +442,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [244, 1456]
+    coordinate: [241, 1456]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_repack_bits_bb_0
   id: blocks_repack_bits_bb
   parameters:
@@ -914,7 +914,7 @@ blocks:
     bus_structure: null
     coordinate: [603, 1329]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: fft_vxx_0
   id: fft_vxx
   parameters:
@@ -1035,7 +1035,7 @@ blocks:
     color9: '"dark green"'
     comment: ''
     ctrlpanel: 'False'
-    fc: rx_b200_f
+    fc: prx_downstream_freq
     fftsize: '1024'
     freqhalf: 'True'
     grid: 'False'
@@ -1054,7 +1054,7 @@ blocks:
     legend: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    name: B200 SU
+    name: PRIMARY RX B200 DOWNSTREAM
     nconnections: '1'
     showports: 'False'
     tr_chan: '0'
@@ -1081,7 +1081,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [460, 504]
+    coordinate: [460, 503]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -1250,7 +1250,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: tx_b200_f
+    center_freq0: prx_upstream_freq
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1292,9 +1292,9 @@ blocks:
     clock_source6: ''
     clock_source7: ''
     comment: ''
-    dev_addr: serial=F5C243
+    dev_addr: serial=F5C234
     dev_args: '""'
-    gain0: tx_b200_g
+    gain0: prx_upstream_gain
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -1454,7 +1454,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1586, 1817]
+    coordinate: [1586, 1816]
     rotation: 0
     state: enabled
 - name: uhd_usrp_source_0
@@ -1526,7 +1526,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: rx_b200_f
+    center_freq0: prx_downstream_freq
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1600,9 +1600,9 @@ blocks:
     dc_offs_enb7: '""'
     dc_offs_enb8: '""'
     dc_offs_enb9: '""'
-    dev_addr: serial=F5C243
+    dev_addr: serial=F5C234
     dev_args: '""'
-    gain0: rx_b200_g
+    gain0: prx_downstream_gain
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -2000,8 +2000,6 @@ connections:
 - [blocks_tag_gate_0, '0', uhd_usrp_sink_0, '0']
 - [blocks_tagged_stream_mux_0, '0', virtual_sink_0_0_0, '0']
 - [blocks_tagged_stream_to_pdu_0, pdus, blocks_message_debug_0, print_pdu]
-- [blocks_tagged_stream_to_pdu_0, pdus, blocks_random_pdu_0, generate]
-- [blocks_tagged_stream_to_pdu_0, pdus, epy_block_0, packet]
 - [digital_chunks_to_symbols_xx_0, '0', blocks_tagged_stream_mux_0, '0']
 - [digital_chunks_to_symbols_xx_0_0, '0', blocks_tagged_stream_mux_0, '1']
 - [digital_constellation_decoder_cb_0_0_0, '0', digital_packet_headerparser_b_0_0_0,

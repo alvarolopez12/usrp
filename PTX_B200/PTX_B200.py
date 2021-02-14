@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: USRP_B200
+# Title: PTX_B200
 # Author: alvaro
 # GNU Radio version: 3.8.2.0
 
@@ -28,6 +28,7 @@ from gnuradio.filter import firdes
 import sip
 from gnuradio import analog
 from gnuradio import blocks
+import pmt
 from gnuradio import digital
 from gnuradio import fft
 from gnuradio.fft import window
@@ -39,16 +40,15 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import uhd
 import time
 from gnuradio.digital.utils import tagged_streams
-import epy_block_0
 
 from gnuradio import qtgui
 
-class USRP_B200(gr.top_block, Qt.QWidget):
+class PTX_B200(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "USRP_B200")
+        gr.top_block.__init__(self, "PTX_B200")
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("USRP_B200")
+        self.setWindowTitle("PTX_B200")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
@@ -66,7 +66,7 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.top_grid_layout = Qt.QGridLayout()
         self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("GNU Radio", "USRP_B200")
+        self.settings = Qt.QSettings("GNU Radio", "PTX_B200")
 
         try:
             if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
@@ -87,14 +87,14 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.length_tag_key = length_tag_key = "packet_len"
         self.header_mod = header_mod = digital.constellation_bpsk()
         self.fft_len = fft_len = 64
-        self.tx_b200_g = tx_b200_g = 50
-        self.tx_b200_f = tx_b200_f = 600000000
         self.sync_word2 = sync_word2 = [0, 0, 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 0, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 0, 0, 0, 0, 0]
         self.sync_word1 = sync_word1 = [0., 0., 0., 0., 0., 0., 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 0., 0., 0., 0., 0.]
         self.samp_rate = samp_rate = 500000
-        self.rx_b200_g = rx_b200_g = 50
-        self.rx_b200_f = rx_b200_f = 650000000
         self.rolloff = rolloff = 0
+        self.ptx_upstream_gain = ptx_upstream_gain = 50
+        self.ptx_upstream_freq = ptx_upstream_freq = 2400000000
+        self.ptx_downstream_gain = ptx_downstream_gain = 50
+        self.ptx_downstream_freq = ptx_downstream_freq = 2410000000
         self.payload_equalizer = payload_equalizer = digital.ofdm_equalizer_simpledfe(fft_len, payload_mod.base(), occupied_carriers, pilot_carriers, pilot_symbols, 1)
         self.packet_len = packet_len = 125
         self.header_formatter = header_formatter = digital.packet_header_ofdm(occupied_carriers, n_syms=1, len_tag_key=packet_length_tag_key, frame_len_tag_key=length_tag_key, bits_per_header_sym=header_mod.bits_per_symbol(), bits_per_payload_sym=payload_mod.bits_per_symbol(), scramble_header=False)
@@ -104,34 +104,34 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
-        self._tx_b200_g_tool_bar = Qt.QToolBar(self)
-        self._tx_b200_g_tool_bar.addWidget(Qt.QLabel('B200 GAIN TX PU' + ": "))
-        self._tx_b200_g_line_edit = Qt.QLineEdit(str(self.tx_b200_g))
-        self._tx_b200_g_tool_bar.addWidget(self._tx_b200_g_line_edit)
-        self._tx_b200_g_line_edit.returnPressed.connect(
-            lambda: self.set_tx_b200_g(int(str(self._tx_b200_g_line_edit.text()))))
-        self.top_grid_layout.addWidget(self._tx_b200_g_tool_bar)
-        self._tx_b200_f_tool_bar = Qt.QToolBar(self)
-        self._tx_b200_f_tool_bar.addWidget(Qt.QLabel('B200 FREQ TX PU' + ": "))
-        self._tx_b200_f_line_edit = Qt.QLineEdit(str(self.tx_b200_f))
-        self._tx_b200_f_tool_bar.addWidget(self._tx_b200_f_line_edit)
-        self._tx_b200_f_line_edit.returnPressed.connect(
-            lambda: self.set_tx_b200_f(int(str(self._tx_b200_f_line_edit.text()))))
-        self.top_grid_layout.addWidget(self._tx_b200_f_tool_bar)
-        self._rx_b200_g_tool_bar = Qt.QToolBar(self)
-        self._rx_b200_g_tool_bar.addWidget(Qt.QLabel('B200 GAIN RX SU' + ": "))
-        self._rx_b200_g_line_edit = Qt.QLineEdit(str(self.rx_b200_g))
-        self._rx_b200_g_tool_bar.addWidget(self._rx_b200_g_line_edit)
-        self._rx_b200_g_line_edit.returnPressed.connect(
-            lambda: self.set_rx_b200_g(int(str(self._rx_b200_g_line_edit.text()))))
-        self.top_grid_layout.addWidget(self._rx_b200_g_tool_bar)
-        self._rx_b200_f_tool_bar = Qt.QToolBar(self)
-        self._rx_b200_f_tool_bar.addWidget(Qt.QLabel('B200 FREQ RX SU' + ": "))
-        self._rx_b200_f_line_edit = Qt.QLineEdit(str(self.rx_b200_f))
-        self._rx_b200_f_tool_bar.addWidget(self._rx_b200_f_line_edit)
-        self._rx_b200_f_line_edit.returnPressed.connect(
-            lambda: self.set_rx_b200_f(int(str(self._rx_b200_f_line_edit.text()))))
-        self.top_grid_layout.addWidget(self._rx_b200_f_tool_bar)
+        self._ptx_upstream_gain_tool_bar = Qt.QToolBar(self)
+        self._ptx_upstream_gain_tool_bar.addWidget(Qt.QLabel('PRIMARY TX UPSTREAM GAIN' + ": "))
+        self._ptx_upstream_gain_line_edit = Qt.QLineEdit(str(self.ptx_upstream_gain))
+        self._ptx_upstream_gain_tool_bar.addWidget(self._ptx_upstream_gain_line_edit)
+        self._ptx_upstream_gain_line_edit.returnPressed.connect(
+            lambda: self.set_ptx_upstream_gain(int(str(self._ptx_upstream_gain_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._ptx_upstream_gain_tool_bar)
+        self._ptx_upstream_freq_tool_bar = Qt.QToolBar(self)
+        self._ptx_upstream_freq_tool_bar.addWidget(Qt.QLabel('PRIMARY TX UPSTREAM FREQ' + ": "))
+        self._ptx_upstream_freq_line_edit = Qt.QLineEdit(str(self.ptx_upstream_freq))
+        self._ptx_upstream_freq_tool_bar.addWidget(self._ptx_upstream_freq_line_edit)
+        self._ptx_upstream_freq_line_edit.returnPressed.connect(
+            lambda: self.set_ptx_upstream_freq(int(str(self._ptx_upstream_freq_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._ptx_upstream_freq_tool_bar)
+        self._ptx_downstream_gain_tool_bar = Qt.QToolBar(self)
+        self._ptx_downstream_gain_tool_bar.addWidget(Qt.QLabel('PRIMARY TX DOWNSTREAM GAIN' + ": "))
+        self._ptx_downstream_gain_line_edit = Qt.QLineEdit(str(self.ptx_downstream_gain))
+        self._ptx_downstream_gain_tool_bar.addWidget(self._ptx_downstream_gain_line_edit)
+        self._ptx_downstream_gain_line_edit.returnPressed.connect(
+            lambda: self.set_ptx_downstream_gain(eng_notation.str_to_num(str(self._ptx_downstream_gain_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._ptx_downstream_gain_tool_bar)
+        self._ptx_downstream_freq_tool_bar = Qt.QToolBar(self)
+        self._ptx_downstream_freq_tool_bar.addWidget(Qt.QLabel('PRIMARY TX DOWNSTREAM FREQ' + ": "))
+        self._ptx_downstream_freq_line_edit = Qt.QLineEdit(str(self.ptx_downstream_freq))
+        self._ptx_downstream_freq_tool_bar.addWidget(self._ptx_downstream_freq_line_edit)
+        self._ptx_downstream_freq_line_edit.returnPressed.connect(
+            lambda: self.set_ptx_downstream_freq(int(str(self._ptx_downstream_freq_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._ptx_downstream_freq_tool_bar)
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(('serial=F5C243', "")),
             uhd.stream_args(
@@ -140,8 +140,8 @@ class USRP_B200(gr.top_block, Qt.QWidget):
                 channels=list(range(0,1)),
             ),
         )
-        self.uhd_usrp_source_0.set_center_freq(rx_b200_f, 0)
-        self.uhd_usrp_source_0.set_gain(rx_b200_g, 0)
+        self.uhd_usrp_source_0.set_center_freq(ptx_downstream_freq, 0)
+        self.uhd_usrp_source_0.set_gain(ptx_downstream_gain, 0)
         self.uhd_usrp_source_0.set_antenna('RX2', 0)
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec())
@@ -154,17 +154,17 @@ class USRP_B200(gr.top_block, Qt.QWidget):
             ),
             '',
         )
-        self.uhd_usrp_sink_0.set_center_freq(tx_b200_f, 0)
-        self.uhd_usrp_sink_0.set_gain(tx_b200_g, 0)
+        self.uhd_usrp_sink_0.set_center_freq(ptx_upstream_freq, 0)
+        self.uhd_usrp_sink_0.set_gain(ptx_upstream_gain, 0)
         self.uhd_usrp_sink_0.set_antenna('TX/RX', 0)
         self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
         self.uhd_usrp_sink_0.set_time_unknown_pps(uhd.time_spec())
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
             1024, #size
             firdes.WIN_BLACKMAN_hARRIS, #wintype
-            rx_b200_f, #fc
+            ptx_downstream_freq, #fc
             samp_rate, #bw
-            'B200 SU', #name
+            'PRIMARY TX B200 DOWNSTREAM', #name
             1
         )
         self.qtgui_freq_sink_x_0.set_update_time(0.10)
@@ -199,21 +199,20 @@ class USRP_B200(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
         self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.fft_vxx_1_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
-        self.fft_vxx_0_0_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
+        self.fft_vxx_1_0_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
+        self.fft_vxx_0_0_0_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
         self.fft_vxx_0 = fft.fft_vcc(fft_len, False, (), True, 1)
-        self.epy_block_0 = epy_block_0.mac()
         self.digital_protocol_formatter_async_0 = digital.protocol_formatter_async(hdr_format)
-        self.digital_packet_headerparser_b_0_0_0 = digital.packet_headerparser_b(header_formatter.base())
-        self.digital_ofdm_sync_sc_cfb_0_0_0 = digital.ofdm_sync_sc_cfb(fft_len, fft_len//4, False, 0.9)
-        self.digital_ofdm_serializer_vcc_payload_0_0 = digital.ofdm_serializer_vcc(fft_len, occupied_carriers, length_tag_key, packet_length_tag_key, 1, '', True)
-        self.digital_ofdm_serializer_vcc_header_0_0 = digital.ofdm_serializer_vcc(fft_len, occupied_carriers, length_tag_key, '', 0, '', True)
-        self.digital_ofdm_frame_equalizer_vcvc_1_0_0 = digital.ofdm_frame_equalizer_vcvc(payload_equalizer.base(), fft_len//4, length_tag_key, True, 0)
-        self.digital_ofdm_frame_equalizer_vcvc_0_0_0 = digital.ofdm_frame_equalizer_vcvc(header_equalizer.base(), fft_len//4, length_tag_key, True, 1)
+        self.digital_packet_headerparser_b_0_0_0_0 = digital.packet_headerparser_b(header_formatter.base())
+        self.digital_ofdm_sync_sc_cfb_0_0_0_0 = digital.ofdm_sync_sc_cfb(fft_len, fft_len//4, False, 0.9)
+        self.digital_ofdm_serializer_vcc_payload_0_0_0 = digital.ofdm_serializer_vcc(fft_len, occupied_carriers, length_tag_key, packet_length_tag_key, 1, '', True)
+        self.digital_ofdm_serializer_vcc_header_0_0_0 = digital.ofdm_serializer_vcc(fft_len, occupied_carriers, length_tag_key, '', 0, '', True)
+        self.digital_ofdm_frame_equalizer_vcvc_1_0_0_0 = digital.ofdm_frame_equalizer_vcvc(payload_equalizer.base(), fft_len//4, length_tag_key, True, 0)
+        self.digital_ofdm_frame_equalizer_vcvc_0_0_0_0 = digital.ofdm_frame_equalizer_vcvc(header_equalizer.base(), fft_len//4, length_tag_key, True, 1)
         self.digital_ofdm_cyclic_prefixer_0 = digital.ofdm_cyclic_prefixer(fft_len, fft_len + fft_len//4, rolloff, length_tag_key)
-        self.digital_ofdm_chanest_vcvc_0_0_0 = digital.ofdm_chanest_vcvc(sync_word1, sync_word2, 1, 0, 3, False)
+        self.digital_ofdm_chanest_vcvc_0_0_0_0 = digital.ofdm_chanest_vcvc(sync_word1, sync_word2, 1, 0, 3, False)
         self.digital_ofdm_carrier_allocator_cvc_0 = digital.ofdm_carrier_allocator_cvc( fft_len, occupied_carriers, pilot_carriers, pilot_symbols, (sync_word1, sync_word2), length_tag_key, True)
-        self.digital_header_payload_demux_0_0_0 = digital.header_payload_demux(
+        self.digital_header_payload_demux_0_0_0_0 = digital.header_payload_demux(
             3,
             fft_len,
             fft_len//4,
@@ -225,73 +224,77 @@ class USRP_B200(gr.top_block, Qt.QWidget):
             samp_rate,
             (),
             0)
-        self.digital_constellation_decoder_cb_1_0_0 = digital.constellation_decoder_cb(payload_mod.base())
-        self.digital_constellation_decoder_cb_0_0_0 = digital.constellation_decoder_cb(header_mod.base())
+        self.digital_constellation_decoder_cb_1_0_0_0 = digital.constellation_decoder_cb(payload_mod.base())
+        self.digital_constellation_decoder_cb_0_0_0_0 = digital.constellation_decoder_cb(header_mod.base())
         self.digital_chunks_to_symbols_xx_0_0 = digital.chunks_to_symbols_bc(payload_mod.points(), 1)
         self.digital_chunks_to_symbols_xx_0 = digital.chunks_to_symbols_bc(header_mod.points(), 1)
-        self.blocks_tagged_stream_to_pdu_0 = blocks.tagged_stream_to_pdu(blocks.byte_t, length_tag_key)
+        self.blocks_tagged_stream_to_pdu_0_0 = blocks.tagged_stream_to_pdu(blocks.byte_t, length_tag_key)
         self.blocks_tagged_stream_mux_0 = blocks.tagged_stream_mux(gr.sizeof_gr_complex*1, length_tag_key, 0)
         self.blocks_tag_gate_0 = blocks.tag_gate(gr.sizeof_gr_complex * 1, True)
         self.blocks_tag_gate_0.set_single_key("")
-        self.blocks_tag_debug_1_0_0 = blocks.tag_debug(gr.sizeof_char*1, 'Rx Bytes', "")
-        self.blocks_tag_debug_1_0_0.set_display(False)
-        self.blocks_repack_bits_bb_0_1_0_0 = blocks.repack_bits_bb(payload_mod.bits_per_symbol(), 8, packet_length_tag_key, True, gr.GR_LSB_FIRST)
+        self.blocks_tag_debug_1_0_0_0 = blocks.tag_debug(gr.sizeof_char*1, 'Rx Bytes', "")
+        self.blocks_tag_debug_1_0_0_0.set_display(False)
+        self.blocks_repack_bits_bb_0_1_0_0_0 = blocks.repack_bits_bb(payload_mod.bits_per_symbol(), 8, packet_length_tag_key, True, gr.GR_LSB_FIRST)
         self.blocks_repack_bits_bb_0_0 = blocks.repack_bits_bb(8, 1, length_tag_key, False, gr.GR_LSB_FIRST)
         self.blocks_repack_bits_bb_0 = blocks.repack_bits_bb(8, payload_mod.bits_per_symbol(), length_tag_key, False, gr.GR_LSB_FIRST)
+        self.blocks_random_pdu_0 = blocks.random_pdu(119, 119, 0xff, 1)
         self.blocks_pdu_to_tagged_stream_0_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
         self.blocks_pdu_to_tagged_stream_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
-        self.blocks_multiply_xx_0_0_0 = blocks.multiply_vcc(1)
+        self.blocks_multiply_xx_0_0_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(50e-3)
-        self.blocks_delay_0_0_0 = blocks.delay(gr.sizeof_gr_complex*1, fft_len+fft_len//4)
-        self.analog_frequency_modulator_fc_0_0_0 = analog.frequency_modulator_fc(-2.0/fft_len)
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("TEST"), 1)
+        self.blocks_message_debug_0_0_0 = blocks.message_debug()
+        self.blocks_delay_0_0_0_0 = blocks.delay(gr.sizeof_gr_complex*1, fft_len+fft_len//4)
+        self.analog_frequency_modulator_fc_0_0_0_0 = analog.frequency_modulator_fc(-2.0/fft_len)
 
 
 
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_tagged_stream_to_pdu_0, 'pdus'), (self.epy_block_0, 'packet'))
-        self.msg_connect((self.digital_packet_headerparser_b_0_0_0, 'header_data'), (self.digital_header_payload_demux_0_0_0, 'header_data'))
+        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.blocks_random_pdu_0, 'generate'))
+        self.msg_connect((self.blocks_random_pdu_0, 'pdus'), (self.digital_protocol_formatter_async_0, 'in'))
+        self.msg_connect((self.blocks_tagged_stream_to_pdu_0_0, 'pdus'), (self.blocks_message_debug_0_0_0, 'print_pdu'))
+        self.msg_connect((self.digital_packet_headerparser_b_0_0_0_0, 'header_data'), (self.digital_header_payload_demux_0_0_0_0, 'header_data'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'payload'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
         self.msg_connect((self.digital_protocol_formatter_async_0, 'header'), (self.blocks_pdu_to_tagged_stream_0_0, 'pdus'))
-        self.msg_connect((self.epy_block_0, 'ack'), (self.digital_protocol_formatter_async_0, 'in'))
-        self.connect((self.analog_frequency_modulator_fc_0_0_0, 0), (self.blocks_multiply_xx_0_0_0, 0))
-        self.connect((self.blocks_delay_0_0_0, 0), (self.blocks_multiply_xx_0_0_0, 1))
+        self.connect((self.analog_frequency_modulator_fc_0_0_0_0, 0), (self.blocks_multiply_xx_0_0_0_0, 0))
+        self.connect((self.blocks_delay_0_0_0_0, 0), (self.blocks_multiply_xx_0_0_0_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_tag_gate_0, 0))
-        self.connect((self.blocks_multiply_xx_0_0_0, 0), (self.digital_header_payload_demux_0_0_0, 0))
+        self.connect((self.blocks_multiply_xx_0_0_0_0, 0), (self.digital_header_payload_demux_0_0_0_0, 0))
         self.connect((self.blocks_pdu_to_tagged_stream_0, 0), (self.blocks_repack_bits_bb_0, 0))
         self.connect((self.blocks_pdu_to_tagged_stream_0_0, 0), (self.blocks_repack_bits_bb_0_0, 0))
         self.connect((self.blocks_repack_bits_bb_0, 0), (self.digital_chunks_to_symbols_xx_0_0, 0))
         self.connect((self.blocks_repack_bits_bb_0_0, 0), (self.digital_chunks_to_symbols_xx_0, 0))
-        self.connect((self.blocks_repack_bits_bb_0_1_0_0, 0), (self.blocks_tag_debug_1_0_0, 0))
-        self.connect((self.blocks_repack_bits_bb_0_1_0_0, 0), (self.blocks_tagged_stream_to_pdu_0, 0))
+        self.connect((self.blocks_repack_bits_bb_0_1_0_0_0, 0), (self.blocks_tag_debug_1_0_0_0, 0))
+        self.connect((self.blocks_repack_bits_bb_0_1_0_0_0, 0), (self.blocks_tagged_stream_to_pdu_0_0, 0))
         self.connect((self.blocks_tag_gate_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_ofdm_carrier_allocator_cvc_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.blocks_tagged_stream_mux_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0_0, 0), (self.blocks_tagged_stream_mux_0, 1))
-        self.connect((self.digital_constellation_decoder_cb_0_0_0, 0), (self.digital_packet_headerparser_b_0_0_0, 0))
-        self.connect((self.digital_constellation_decoder_cb_1_0_0, 0), (self.blocks_repack_bits_bb_0_1_0_0, 0))
-        self.connect((self.digital_header_payload_demux_0_0_0, 0), (self.fft_vxx_0_0_0_0, 0))
-        self.connect((self.digital_header_payload_demux_0_0_0, 1), (self.fft_vxx_1_0_0, 0))
+        self.connect((self.digital_constellation_decoder_cb_0_0_0_0, 0), (self.digital_packet_headerparser_b_0_0_0_0, 0))
+        self.connect((self.digital_constellation_decoder_cb_1_0_0_0, 0), (self.blocks_repack_bits_bb_0_1_0_0_0, 0))
+        self.connect((self.digital_header_payload_demux_0_0_0_0, 0), (self.fft_vxx_0_0_0_0_0, 0))
+        self.connect((self.digital_header_payload_demux_0_0_0_0, 1), (self.fft_vxx_1_0_0_0, 0))
         self.connect((self.digital_ofdm_carrier_allocator_cvc_0, 0), (self.fft_vxx_0, 0))
-        self.connect((self.digital_ofdm_chanest_vcvc_0_0_0, 0), (self.digital_ofdm_frame_equalizer_vcvc_0_0_0, 0))
+        self.connect((self.digital_ofdm_chanest_vcvc_0_0_0_0, 0), (self.digital_ofdm_frame_equalizer_vcvc_0_0_0_0, 0))
         self.connect((self.digital_ofdm_cyclic_prefixer_0, 0), (self.blocks_multiply_const_vxx_0, 0))
-        self.connect((self.digital_ofdm_frame_equalizer_vcvc_0_0_0, 0), (self.digital_ofdm_serializer_vcc_header_0_0, 0))
-        self.connect((self.digital_ofdm_frame_equalizer_vcvc_1_0_0, 0), (self.digital_ofdm_serializer_vcc_payload_0_0, 0))
-        self.connect((self.digital_ofdm_serializer_vcc_header_0_0, 0), (self.digital_constellation_decoder_cb_0_0_0, 0))
-        self.connect((self.digital_ofdm_serializer_vcc_payload_0_0, 0), (self.digital_constellation_decoder_cb_1_0_0, 0))
-        self.connect((self.digital_ofdm_sync_sc_cfb_0_0_0, 0), (self.analog_frequency_modulator_fc_0_0_0, 0))
-        self.connect((self.digital_ofdm_sync_sc_cfb_0_0_0, 1), (self.digital_header_payload_demux_0_0_0, 1))
+        self.connect((self.digital_ofdm_frame_equalizer_vcvc_0_0_0_0, 0), (self.digital_ofdm_serializer_vcc_header_0_0_0, 0))
+        self.connect((self.digital_ofdm_frame_equalizer_vcvc_1_0_0_0, 0), (self.digital_ofdm_serializer_vcc_payload_0_0_0, 0))
+        self.connect((self.digital_ofdm_serializer_vcc_header_0_0_0, 0), (self.digital_constellation_decoder_cb_0_0_0_0, 0))
+        self.connect((self.digital_ofdm_serializer_vcc_payload_0_0_0, 0), (self.digital_constellation_decoder_cb_1_0_0_0, 0))
+        self.connect((self.digital_ofdm_sync_sc_cfb_0_0_0_0, 0), (self.analog_frequency_modulator_fc_0_0_0_0, 0))
+        self.connect((self.digital_ofdm_sync_sc_cfb_0_0_0_0, 1), (self.digital_header_payload_demux_0_0_0_0, 1))
         self.connect((self.fft_vxx_0, 0), (self.digital_ofdm_cyclic_prefixer_0, 0))
-        self.connect((self.fft_vxx_0_0_0_0, 0), (self.digital_ofdm_chanest_vcvc_0_0_0, 0))
-        self.connect((self.fft_vxx_1_0_0, 0), (self.digital_ofdm_frame_equalizer_vcvc_1_0_0, 0))
-        self.connect((self.uhd_usrp_source_0, 0), (self.blocks_delay_0_0_0, 0))
-        self.connect((self.uhd_usrp_source_0, 0), (self.digital_ofdm_sync_sc_cfb_0_0_0, 0))
+        self.connect((self.fft_vxx_0_0_0_0_0, 0), (self.digital_ofdm_chanest_vcvc_0_0_0_0, 0))
+        self.connect((self.fft_vxx_1_0_0_0, 0), (self.digital_ofdm_frame_equalizer_vcvc_1_0_0_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.blocks_delay_0_0_0_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.digital_ofdm_sync_sc_cfb_0_0_0_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_freq_sink_x_0, 0))
 
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("GNU Radio", "USRP_B200")
+        self.settings = Qt.QSettings("GNU Radio", "PTX_B200")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
 
@@ -355,24 +358,8 @@ class USRP_B200(gr.top_block, Qt.QWidget):
         self.fft_len = fft_len
         self.set_header_equalizer(digital.ofdm_equalizer_simpledfe(self.fft_len, header_mod.base(), self.occupied_carriers, self.pilot_carriers, self.pilot_symbols))
         self.set_payload_equalizer(digital.ofdm_equalizer_simpledfe(self.fft_len, payload_mod.base(), self.occupied_carriers, self.pilot_carriers, self.pilot_symbols, 1))
-        self.analog_frequency_modulator_fc_0_0_0.set_sensitivity(-2.0/self.fft_len)
-        self.blocks_delay_0_0_0.set_dly(self.fft_len+self.fft_len//4)
-
-    def get_tx_b200_g(self):
-        return self.tx_b200_g
-
-    def set_tx_b200_g(self, tx_b200_g):
-        self.tx_b200_g = tx_b200_g
-        Qt.QMetaObject.invokeMethod(self._tx_b200_g_line_edit, "setText", Qt.Q_ARG("QString", str(self.tx_b200_g)))
-        self.uhd_usrp_sink_0.set_gain(self.tx_b200_g, 0)
-
-    def get_tx_b200_f(self):
-        return self.tx_b200_f
-
-    def set_tx_b200_f(self, tx_b200_f):
-        self.tx_b200_f = tx_b200_f
-        Qt.QMetaObject.invokeMethod(self._tx_b200_f_line_edit, "setText", Qt.Q_ARG("QString", str(self.tx_b200_f)))
-        self.uhd_usrp_sink_0.set_center_freq(self.tx_b200_f, 0)
+        self.analog_frequency_modulator_fc_0_0_0_0.set_sensitivity(-2.0/self.fft_len)
+        self.blocks_delay_0_0_0_0.set_dly(self.fft_len+self.fft_len//4)
 
     def get_sync_word2(self):
         return self.sync_word2
@@ -391,32 +378,48 @@ class USRP_B200(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.rx_b200_f, self.samp_rate)
+        self.qtgui_freq_sink_x_0.set_frequency_range(self.ptx_downstream_freq, self.samp_rate)
         self.uhd_usrp_sink_0.set_samp_rate(self.samp_rate)
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
-
-    def get_rx_b200_g(self):
-        return self.rx_b200_g
-
-    def set_rx_b200_g(self, rx_b200_g):
-        self.rx_b200_g = rx_b200_g
-        Qt.QMetaObject.invokeMethod(self._rx_b200_g_line_edit, "setText", Qt.Q_ARG("QString", str(self.rx_b200_g)))
-        self.uhd_usrp_source_0.set_gain(self.rx_b200_g, 0)
-
-    def get_rx_b200_f(self):
-        return self.rx_b200_f
-
-    def set_rx_b200_f(self, rx_b200_f):
-        self.rx_b200_f = rx_b200_f
-        Qt.QMetaObject.invokeMethod(self._rx_b200_f_line_edit, "setText", Qt.Q_ARG("QString", str(self.rx_b200_f)))
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.rx_b200_f, self.samp_rate)
-        self.uhd_usrp_source_0.set_center_freq(self.rx_b200_f, 0)
 
     def get_rolloff(self):
         return self.rolloff
 
     def set_rolloff(self, rolloff):
         self.rolloff = rolloff
+
+    def get_ptx_upstream_gain(self):
+        return self.ptx_upstream_gain
+
+    def set_ptx_upstream_gain(self, ptx_upstream_gain):
+        self.ptx_upstream_gain = ptx_upstream_gain
+        Qt.QMetaObject.invokeMethod(self._ptx_upstream_gain_line_edit, "setText", Qt.Q_ARG("QString", str(self.ptx_upstream_gain)))
+        self.uhd_usrp_sink_0.set_gain(self.ptx_upstream_gain, 0)
+
+    def get_ptx_upstream_freq(self):
+        return self.ptx_upstream_freq
+
+    def set_ptx_upstream_freq(self, ptx_upstream_freq):
+        self.ptx_upstream_freq = ptx_upstream_freq
+        Qt.QMetaObject.invokeMethod(self._ptx_upstream_freq_line_edit, "setText", Qt.Q_ARG("QString", str(self.ptx_upstream_freq)))
+        self.uhd_usrp_sink_0.set_center_freq(self.ptx_upstream_freq, 0)
+
+    def get_ptx_downstream_gain(self):
+        return self.ptx_downstream_gain
+
+    def set_ptx_downstream_gain(self, ptx_downstream_gain):
+        self.ptx_downstream_gain = ptx_downstream_gain
+        Qt.QMetaObject.invokeMethod(self._ptx_downstream_gain_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.ptx_downstream_gain)))
+        self.uhd_usrp_source_0.set_gain(self.ptx_downstream_gain, 0)
+
+    def get_ptx_downstream_freq(self):
+        return self.ptx_downstream_freq
+
+    def set_ptx_downstream_freq(self, ptx_downstream_freq):
+        self.ptx_downstream_freq = ptx_downstream_freq
+        Qt.QMetaObject.invokeMethod(self._ptx_downstream_freq_line_edit, "setText", Qt.Q_ARG("QString", str(self.ptx_downstream_freq)))
+        self.qtgui_freq_sink_x_0.set_frequency_range(self.ptx_downstream_freq, self.samp_rate)
+        self.uhd_usrp_source_0.set_center_freq(self.ptx_downstream_freq, 0)
 
     def get_payload_equalizer(self):
         return self.payload_equalizer
@@ -452,7 +455,7 @@ class USRP_B200(gr.top_block, Qt.QWidget):
 
 
 
-def main(top_block_cls=USRP_B200, options=None):
+def main(top_block_cls=PTX_B200, options=None):
 
     if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
         style = gr.prefs().get_string('qtgui', 'style', 'raster')
