@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: PTX_B200
+# Title: PRIMARY USER
 # Author: alvaro
 # GNU Radio version: 3.8.2.0
 
@@ -22,14 +22,16 @@ if __name__ == '__main__':
             print("Warning: failed to XInitThreads()")
 
 from PyQt5 import Qt
+from PyQt5.QtCore import QObject, pyqtSlot
 from gnuradio import eng_notation
 from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
 from gnuradio import analog
 from gnuradio import blocks
-import pmt
+import numpy
 from gnuradio import digital
+from gnuradio import fec
 from gnuradio import fft
 from gnuradio.fft import window
 from gnuradio import gr
@@ -43,12 +45,12 @@ from gnuradio.digital.utils import tagged_streams
 
 from gnuradio import qtgui
 
-class PTX_B200(gr.top_block, Qt.QWidget):
+class primary_user(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "PTX_B200")
+        gr.top_block.__init__(self, "PRIMARY USER")
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("PTX_B200")
+        self.setWindowTitle("PRIMARY USER")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
@@ -66,7 +68,7 @@ class PTX_B200(gr.top_block, Qt.QWidget):
         self.top_grid_layout = Qt.QGridLayout()
         self.top_layout.addLayout(self.top_grid_layout)
 
-        self.settings = Qt.QSettings("GNU Radio", "PTX_B200")
+        self.settings = Qt.QSettings("GNU Radio", "primary_user")
 
         try:
             if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
@@ -89,12 +91,10 @@ class PTX_B200(gr.top_block, Qt.QWidget):
         self.fft_len = fft_len = 64
         self.sync_word2 = sync_word2 = [0, 0, 0, 0, 0, 0, -1, -1, -1, -1, 1, 1, -1, -1, -1, 1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, 1, -1, -1, 1, -1, 0, 1, -1, 1, 1, 1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, 1, -1, -1, -1, 1, -1, 1, -1, -1, -1, -1, 0, 0, 0, 0, 0]
         self.sync_word1 = sync_word1 = [0., 0., 0., 0., 0., 0., 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., -1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., -1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 1.41421356, 0., 0., 0., 0., 0., 0.]
-        self.samp_rate = samp_rate = 500000
+        self.samp_rate = samp_rate = 100000
         self.rolloff = rolloff = 0
-        self.ptx_upstream_gain = ptx_upstream_gain = 50
-        self.ptx_upstream_freq = ptx_upstream_freq = 2400000000
-        self.ptx_downstream_gain = ptx_downstream_gain = 50
-        self.ptx_downstream_freq = ptx_downstream_freq = 2410000000
+        self.primary_gain = primary_gain = 50
+        self.primary_freq = primary_freq = 2410000000
         self.payload_equalizer = payload_equalizer = digital.ofdm_equalizer_simpledfe(fft_len, payload_mod.base(), occupied_carriers, pilot_carriers, pilot_symbols, 1)
         self.packet_len = packet_len = 125
         self.header_formatter = header_formatter = digital.packet_header_ofdm(occupied_carriers, n_syms=1, len_tag_key=packet_length_tag_key, frame_len_tag_key=length_tag_key, bits_per_header_sym=header_mod.bits_per_symbol(), bits_per_payload_sym=payload_mod.bits_per_symbol(), scramble_header=False)
@@ -104,34 +104,38 @@ class PTX_B200(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
-        self._ptx_upstream_gain_tool_bar = Qt.QToolBar(self)
-        self._ptx_upstream_gain_tool_bar.addWidget(Qt.QLabel('PRIMARY TX UPSTREAM GAIN' + ": "))
-        self._ptx_upstream_gain_line_edit = Qt.QLineEdit(str(self.ptx_upstream_gain))
-        self._ptx_upstream_gain_tool_bar.addWidget(self._ptx_upstream_gain_line_edit)
-        self._ptx_upstream_gain_line_edit.returnPressed.connect(
-            lambda: self.set_ptx_upstream_gain(int(str(self._ptx_upstream_gain_line_edit.text()))))
-        self.top_grid_layout.addWidget(self._ptx_upstream_gain_tool_bar)
-        self._ptx_upstream_freq_tool_bar = Qt.QToolBar(self)
-        self._ptx_upstream_freq_tool_bar.addWidget(Qt.QLabel('PRIMARY TX UPSTREAM FREQ' + ": "))
-        self._ptx_upstream_freq_line_edit = Qt.QLineEdit(str(self.ptx_upstream_freq))
-        self._ptx_upstream_freq_tool_bar.addWidget(self._ptx_upstream_freq_line_edit)
-        self._ptx_upstream_freq_line_edit.returnPressed.connect(
-            lambda: self.set_ptx_upstream_freq(int(str(self._ptx_upstream_freq_line_edit.text()))))
-        self.top_grid_layout.addWidget(self._ptx_upstream_freq_tool_bar)
-        self._ptx_downstream_gain_tool_bar = Qt.QToolBar(self)
-        self._ptx_downstream_gain_tool_bar.addWidget(Qt.QLabel('PRIMARY TX DOWNSTREAM GAIN' + ": "))
-        self._ptx_downstream_gain_line_edit = Qt.QLineEdit(str(self.ptx_downstream_gain))
-        self._ptx_downstream_gain_tool_bar.addWidget(self._ptx_downstream_gain_line_edit)
-        self._ptx_downstream_gain_line_edit.returnPressed.connect(
-            lambda: self.set_ptx_downstream_gain(eng_notation.str_to_num(str(self._ptx_downstream_gain_line_edit.text()))))
-        self.top_grid_layout.addWidget(self._ptx_downstream_gain_tool_bar)
-        self._ptx_downstream_freq_tool_bar = Qt.QToolBar(self)
-        self._ptx_downstream_freq_tool_bar.addWidget(Qt.QLabel('PRIMARY TX DOWNSTREAM FREQ' + ": "))
-        self._ptx_downstream_freq_line_edit = Qt.QLineEdit(str(self.ptx_downstream_freq))
-        self._ptx_downstream_freq_tool_bar.addWidget(self._ptx_downstream_freq_line_edit)
-        self._ptx_downstream_freq_line_edit.returnPressed.connect(
-            lambda: self.set_ptx_downstream_freq(int(str(self._ptx_downstream_freq_line_edit.text()))))
-        self.top_grid_layout.addWidget(self._ptx_downstream_freq_tool_bar)
+        self._primary_gain_tool_bar = Qt.QToolBar(self)
+        self._primary_gain_tool_bar.addWidget(Qt.QLabel('PRIMARY GAIN' + ": "))
+        self._primary_gain_line_edit = Qt.QLineEdit(str(self.primary_gain))
+        self._primary_gain_tool_bar.addWidget(self._primary_gain_line_edit)
+        self._primary_gain_line_edit.returnPressed.connect(
+            lambda: self.set_primary_gain(eng_notation.str_to_num(str(self._primary_gain_line_edit.text()))))
+        self.top_grid_layout.addWidget(self._primary_gain_tool_bar)
+        # Create the options list
+        self._primary_freq_options = (2410000000, 2420000000, 2430000000, 2440000000, 2450000000, )
+        # Create the labels list
+        self._primary_freq_labels = ('Ch1: 2.41 GHz', 'Ch2: 2.42 GHz', 'Ch3: 2.43 GHz', 'Ch4: 2.44 GHz', 'Ch5: 2.45 GHz', )
+        # Create the combo box
+        # Create the radio buttons
+        self._primary_freq_group_box = Qt.QGroupBox('PRIMARY TX FREQ' + ": ")
+        self._primary_freq_box = Qt.QVBoxLayout()
+        class variable_chooser_button_group(Qt.QButtonGroup):
+            def __init__(self, parent=None):
+                Qt.QButtonGroup.__init__(self, parent)
+            @pyqtSlot(int)
+            def updateButtonChecked(self, button_id):
+                self.button(button_id).setChecked(True)
+        self._primary_freq_button_group = variable_chooser_button_group()
+        self._primary_freq_group_box.setLayout(self._primary_freq_box)
+        for i, _label in enumerate(self._primary_freq_labels):
+            radio_button = Qt.QRadioButton(_label)
+            self._primary_freq_box.addWidget(radio_button)
+            self._primary_freq_button_group.addButton(radio_button, i)
+        self._primary_freq_callback = lambda i: Qt.QMetaObject.invokeMethod(self._primary_freq_button_group, "updateButtonChecked", Qt.Q_ARG("int", self._primary_freq_options.index(i)))
+        self._primary_freq_callback(self.primary_freq)
+        self._primary_freq_button_group.buttonClicked[int].connect(
+            lambda i: self.set_primary_freq(self._primary_freq_options[i]))
+        self.top_grid_layout.addWidget(self._primary_freq_group_box)
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(('serial=F5C243', "")),
             uhd.stream_args(
@@ -140,8 +144,8 @@ class PTX_B200(gr.top_block, Qt.QWidget):
                 channels=list(range(0,1)),
             ),
         )
-        self.uhd_usrp_source_0.set_center_freq(ptx_downstream_freq, 0)
-        self.uhd_usrp_source_0.set_gain(ptx_downstream_gain, 0)
+        self.uhd_usrp_source_0.set_center_freq(primary_freq, 0)
+        self.uhd_usrp_source_0.set_gain(primary_gain, 0)
         self.uhd_usrp_source_0.set_antenna('RX2', 0)
         self.uhd_usrp_source_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0.set_time_unknown_pps(uhd.time_spec())
@@ -154,55 +158,65 @@ class PTX_B200(gr.top_block, Qt.QWidget):
             ),
             '',
         )
-        self.uhd_usrp_sink_0.set_center_freq(ptx_upstream_freq, 0)
-        self.uhd_usrp_sink_0.set_gain(ptx_upstream_gain, 0)
+        self.uhd_usrp_sink_0.set_center_freq(primary_freq, 0)
+        self.uhd_usrp_sink_0.set_gain(primary_gain, 0)
         self.uhd_usrp_sink_0.set_antenna('TX/RX', 0)
         self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
         self.uhd_usrp_sink_0.set_time_unknown_pps(uhd.time_spec())
-        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
-            1024, #size
+        self.qtgui_sink_x_0 = qtgui.sink_c(
+            512, #fftsize
             firdes.WIN_BLACKMAN_hARRIS, #wintype
-            ptx_downstream_freq, #fc
-            samp_rate, #bw
-            'PRIMARY TX B200 DOWNSTREAM', #name
+            primary_freq, #fc
+            50000, #bw
+            'PRIMARY TX', #name
+            True, #plotfreq
+            True, #plotwaterfall
+            True, #plottime
+            True #plotconst
+        )
+        self.qtgui_sink_x_0.set_update_time(1.0/10)
+        self._qtgui_sink_x_0_win = sip.wrapinstance(self.qtgui_sink_x_0.pyqwidget(), Qt.QWidget)
+
+        self.qtgui_sink_x_0.enable_rf_freq(False)
+
+        self.top_grid_layout.addWidget(self._qtgui_sink_x_0_win)
+        self.qtgui_number_sink_0 = qtgui.number_sink(
+            gr.sizeof_float,
+            0,
+            qtgui.NUM_GRAPH_HORIZ,
             1
         )
-        self.qtgui_freq_sink_x_0.set_update_time(0.10)
-        self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
-        self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
-        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
-        self.qtgui_freq_sink_x_0.enable_autoscale(False)
-        self.qtgui_freq_sink_x_0.enable_grid(False)
-        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
-        self.qtgui_freq_sink_x_0.enable_axis_labels(True)
-        self.qtgui_freq_sink_x_0.enable_control_panel(False)
-
-
+        self.qtgui_number_sink_0.set_update_time(0.10)
+        self.qtgui_number_sink_0.set_title("")
 
         labels = ['', '', '', '', '',
             '', '', '', '', '']
-        widths = [1, 1, 1, 1, 1,
+        units = ['', '', '', '', '',
+            '', '', '', '', '']
+        colors = [("black", "black"), ("black", "black"), ("black", "black"), ("black", "black"), ("black", "black"),
+            ("black", "black"), ("black", "black"), ("black", "black"), ("black", "black"), ("black", "black")]
+        factor = [1, 1, 1, 1, 1,
             1, 1, 1, 1, 1]
-        colors = ["blue", "red", "green", "black", "cyan",
-            "magenta", "yellow", "dark red", "dark green", "dark blue"]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
 
         for i in range(1):
+            self.qtgui_number_sink_0.set_min(i, -1)
+            self.qtgui_number_sink_0.set_max(i, 1)
+            self.qtgui_number_sink_0.set_color(i, colors[i][0], colors[i][1])
             if len(labels[i]) == 0:
-                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
+                self.qtgui_number_sink_0.set_label(i, "Data {0}".format(i))
             else:
-                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
-            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
-            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
-            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
+                self.qtgui_number_sink_0.set_label(i, labels[i])
+            self.qtgui_number_sink_0.set_unit(i, units[i])
+            self.qtgui_number_sink_0.set_factor(i, factor[i])
 
-        self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.pyqwidget(), Qt.QWidget)
-        self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_win)
+        self.qtgui_number_sink_0.enable_autoscale(False)
+        self._qtgui_number_sink_0_win = sip.wrapinstance(self.qtgui_number_sink_0.pyqwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_number_sink_0_win)
         self.fft_vxx_1_0_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
         self.fft_vxx_0_0_0_0_0 = fft.fft_vcc(fft_len, True, (), True, 1)
         self.fft_vxx_0 = fft.fft_vcc(fft_len, False, (), True, 1)
-        self.digital_protocol_formatter_async_0 = digital.protocol_formatter_async(hdr_format)
+        self.fec_ber_bf_0 = fec.ber_bf(False, 100, -7.0)
+        self.digital_protocol_formatter_bb_0 = digital.protocol_formatter_bb(hdr_format, length_tag_key)
         self.digital_packet_headerparser_b_0_0_0_0 = digital.packet_headerparser_b(header_formatter.base())
         self.digital_ofdm_sync_sc_cfb_0_0_0_0 = digital.ofdm_sync_sc_cfb(fft_len, fft_len//4, False, 0.9)
         self.digital_ofdm_serializer_vcc_payload_0_0_0 = digital.ofdm_serializer_vcc(fft_len, occupied_carriers, length_tag_key, packet_length_tag_key, 1, '', True)
@@ -232,19 +246,14 @@ class PTX_B200(gr.top_block, Qt.QWidget):
         self.blocks_tagged_stream_mux_0 = blocks.tagged_stream_mux(gr.sizeof_gr_complex*1, length_tag_key, 0)
         self.blocks_tag_gate_0 = blocks.tag_gate(gr.sizeof_gr_complex * 1, True)
         self.blocks_tag_gate_0.set_single_key("")
-        self.blocks_tag_debug_1_0_0_0 = blocks.tag_debug(gr.sizeof_char*1, 'Rx Bytes', "")
-        self.blocks_tag_debug_1_0_0_0.set_display(False)
+        self.blocks_stream_to_tagged_stream_0 = blocks.stream_to_tagged_stream(gr.sizeof_char, 1, packet_len, length_tag_key)
+        self.blocks_repack_bits_bb_0_2 = blocks.repack_bits_bb(8, payload_mod.bits_per_symbol(), length_tag_key, False, gr.GR_LSB_FIRST)
         self.blocks_repack_bits_bb_0_1_0_0_0 = blocks.repack_bits_bb(payload_mod.bits_per_symbol(), 8, packet_length_tag_key, True, gr.GR_LSB_FIRST)
-        self.blocks_repack_bits_bb_0_0 = blocks.repack_bits_bb(8, 1, length_tag_key, False, gr.GR_LSB_FIRST)
-        self.blocks_repack_bits_bb_0 = blocks.repack_bits_bb(8, payload_mod.bits_per_symbol(), length_tag_key, False, gr.GR_LSB_FIRST)
-        self.blocks_random_pdu_0 = blocks.random_pdu(119, 119, 0xff, 1)
-        self.blocks_pdu_to_tagged_stream_0_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
-        self.blocks_pdu_to_tagged_stream_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
+        self.blocks_repack_bits_bb_0_0_1 = blocks.repack_bits_bb(8, 1, length_tag_key, False, gr.GR_LSB_FIRST)
         self.blocks_multiply_xx_0_0_0_0 = blocks.multiply_vcc(1)
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_cc(50e-3)
-        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.intern("TEST"), 1)
-        self.blocks_message_debug_0_0_0 = blocks.message_debug()
         self.blocks_delay_0_0_0_0 = blocks.delay(gr.sizeof_gr_complex*1, fft_len+fft_len//4)
+        self.analog_random_source_x_0 = blocks.vector_source_b(list(map(int, numpy.random.randint(0, 255, 1000))), True)
         self.analog_frequency_modulator_fc_0_0_0_0 = analog.frequency_modulator_fc(-2.0/fft_len)
 
 
@@ -252,22 +261,19 @@ class PTX_B200(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.blocks_random_pdu_0, 'generate'))
-        self.msg_connect((self.blocks_random_pdu_0, 'pdus'), (self.digital_protocol_formatter_async_0, 'in'))
-        self.msg_connect((self.blocks_tagged_stream_to_pdu_0_0, 'pdus'), (self.blocks_message_debug_0_0_0, 'print_pdu'))
         self.msg_connect((self.digital_packet_headerparser_b_0_0_0_0, 'header_data'), (self.digital_header_payload_demux_0_0_0_0, 'header_data'))
-        self.msg_connect((self.digital_protocol_formatter_async_0, 'payload'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
-        self.msg_connect((self.digital_protocol_formatter_async_0, 'header'), (self.blocks_pdu_to_tagged_stream_0_0, 'pdus'))
         self.connect((self.analog_frequency_modulator_fc_0_0_0_0, 0), (self.blocks_multiply_xx_0_0_0_0, 0))
+        self.connect((self.analog_random_source_x_0, 0), (self.blocks_stream_to_tagged_stream_0, 0))
+        self.connect((self.analog_random_source_x_0, 0), (self.fec_ber_bf_0, 0))
+        self.connect((self.analog_random_source_x_0, 0), (self.fec_ber_bf_0, 1))
         self.connect((self.blocks_delay_0_0_0_0, 0), (self.blocks_multiply_xx_0_0_0_0, 1))
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.blocks_tag_gate_0, 0))
         self.connect((self.blocks_multiply_xx_0_0_0_0, 0), (self.digital_header_payload_demux_0_0_0_0, 0))
-        self.connect((self.blocks_pdu_to_tagged_stream_0, 0), (self.blocks_repack_bits_bb_0, 0))
-        self.connect((self.blocks_pdu_to_tagged_stream_0_0, 0), (self.blocks_repack_bits_bb_0_0, 0))
-        self.connect((self.blocks_repack_bits_bb_0, 0), (self.digital_chunks_to_symbols_xx_0_0, 0))
-        self.connect((self.blocks_repack_bits_bb_0_0, 0), (self.digital_chunks_to_symbols_xx_0, 0))
-        self.connect((self.blocks_repack_bits_bb_0_1_0_0_0, 0), (self.blocks_tag_debug_1_0_0_0, 0))
+        self.connect((self.blocks_repack_bits_bb_0_0_1, 0), (self.digital_chunks_to_symbols_xx_0, 0))
         self.connect((self.blocks_repack_bits_bb_0_1_0_0_0, 0), (self.blocks_tagged_stream_to_pdu_0_0, 0))
+        self.connect((self.blocks_repack_bits_bb_0_2, 0), (self.digital_chunks_to_symbols_xx_0_0, 0))
+        self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.blocks_repack_bits_bb_0_2, 0))
+        self.connect((self.blocks_stream_to_tagged_stream_0, 0), (self.digital_protocol_formatter_bb_0, 0))
         self.connect((self.blocks_tag_gate_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.blocks_tagged_stream_mux_0, 0), (self.digital_ofdm_carrier_allocator_cvc_0, 0))
         self.connect((self.digital_chunks_to_symbols_xx_0, 0), (self.blocks_tagged_stream_mux_0, 0))
@@ -285,16 +291,18 @@ class PTX_B200(gr.top_block, Qt.QWidget):
         self.connect((self.digital_ofdm_serializer_vcc_payload_0_0_0, 0), (self.digital_constellation_decoder_cb_1_0_0_0, 0))
         self.connect((self.digital_ofdm_sync_sc_cfb_0_0_0_0, 0), (self.analog_frequency_modulator_fc_0_0_0_0, 0))
         self.connect((self.digital_ofdm_sync_sc_cfb_0_0_0_0, 1), (self.digital_header_payload_demux_0_0_0_0, 1))
+        self.connect((self.digital_protocol_formatter_bb_0, 0), (self.blocks_repack_bits_bb_0_0_1, 0))
+        self.connect((self.fec_ber_bf_0, 0), (self.qtgui_number_sink_0, 0))
         self.connect((self.fft_vxx_0, 0), (self.digital_ofdm_cyclic_prefixer_0, 0))
         self.connect((self.fft_vxx_0_0_0_0_0, 0), (self.digital_ofdm_chanest_vcvc_0_0_0_0, 0))
         self.connect((self.fft_vxx_1_0_0_0, 0), (self.digital_ofdm_frame_equalizer_vcvc_1_0_0_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_delay_0_0_0_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.digital_ofdm_sync_sc_cfb_0_0_0_0, 0))
-        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_sink_x_0, 0))
 
 
     def closeEvent(self, event):
-        self.settings = Qt.QSettings("GNU Radio", "PTX_B200")
+        self.settings = Qt.QSettings("GNU Radio", "primary_user")
         self.settings.setValue("geometry", self.saveGeometry())
         event.accept()
 
@@ -378,7 +386,6 @@ class PTX_B200(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.ptx_downstream_freq, self.samp_rate)
         self.uhd_usrp_sink_0.set_samp_rate(self.samp_rate)
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
@@ -388,38 +395,24 @@ class PTX_B200(gr.top_block, Qt.QWidget):
     def set_rolloff(self, rolloff):
         self.rolloff = rolloff
 
-    def get_ptx_upstream_gain(self):
-        return self.ptx_upstream_gain
+    def get_primary_gain(self):
+        return self.primary_gain
 
-    def set_ptx_upstream_gain(self, ptx_upstream_gain):
-        self.ptx_upstream_gain = ptx_upstream_gain
-        Qt.QMetaObject.invokeMethod(self._ptx_upstream_gain_line_edit, "setText", Qt.Q_ARG("QString", str(self.ptx_upstream_gain)))
-        self.uhd_usrp_sink_0.set_gain(self.ptx_upstream_gain, 0)
+    def set_primary_gain(self, primary_gain):
+        self.primary_gain = primary_gain
+        Qt.QMetaObject.invokeMethod(self._primary_gain_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.primary_gain)))
+        self.uhd_usrp_sink_0.set_gain(self.primary_gain, 0)
+        self.uhd_usrp_source_0.set_gain(self.primary_gain, 0)
 
-    def get_ptx_upstream_freq(self):
-        return self.ptx_upstream_freq
+    def get_primary_freq(self):
+        return self.primary_freq
 
-    def set_ptx_upstream_freq(self, ptx_upstream_freq):
-        self.ptx_upstream_freq = ptx_upstream_freq
-        Qt.QMetaObject.invokeMethod(self._ptx_upstream_freq_line_edit, "setText", Qt.Q_ARG("QString", str(self.ptx_upstream_freq)))
-        self.uhd_usrp_sink_0.set_center_freq(self.ptx_upstream_freq, 0)
-
-    def get_ptx_downstream_gain(self):
-        return self.ptx_downstream_gain
-
-    def set_ptx_downstream_gain(self, ptx_downstream_gain):
-        self.ptx_downstream_gain = ptx_downstream_gain
-        Qt.QMetaObject.invokeMethod(self._ptx_downstream_gain_line_edit, "setText", Qt.Q_ARG("QString", eng_notation.num_to_str(self.ptx_downstream_gain)))
-        self.uhd_usrp_source_0.set_gain(self.ptx_downstream_gain, 0)
-
-    def get_ptx_downstream_freq(self):
-        return self.ptx_downstream_freq
-
-    def set_ptx_downstream_freq(self, ptx_downstream_freq):
-        self.ptx_downstream_freq = ptx_downstream_freq
-        Qt.QMetaObject.invokeMethod(self._ptx_downstream_freq_line_edit, "setText", Qt.Q_ARG("QString", str(self.ptx_downstream_freq)))
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.ptx_downstream_freq, self.samp_rate)
-        self.uhd_usrp_source_0.set_center_freq(self.ptx_downstream_freq, 0)
+    def set_primary_freq(self, primary_freq):
+        self.primary_freq = primary_freq
+        self._primary_freq_callback(self.primary_freq)
+        self.qtgui_sink_x_0.set_frequency_range(self.primary_freq, 50000)
+        self.uhd_usrp_sink_0.set_center_freq(self.primary_freq, 0)
+        self.uhd_usrp_source_0.set_center_freq(self.primary_freq, 0)
 
     def get_payload_equalizer(self):
         return self.payload_equalizer
@@ -432,6 +425,8 @@ class PTX_B200(gr.top_block, Qt.QWidget):
 
     def set_packet_len(self, packet_len):
         self.packet_len = packet_len
+        self.blocks_stream_to_tagged_stream_0.set_packet_len(self.packet_len)
+        self.blocks_stream_to_tagged_stream_0.set_packet_len_pmt(self.packet_len)
 
     def get_header_formatter(self):
         return self.header_formatter
@@ -455,7 +450,7 @@ class PTX_B200(gr.top_block, Qt.QWidget):
 
 
 
-def main(top_block_cls=PTX_B200, options=None):
+def main(top_block_cls=primary_user, options=None):
 
     if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
         style = gr.prefs().get_string('qtgui', 'style', 'raster')
